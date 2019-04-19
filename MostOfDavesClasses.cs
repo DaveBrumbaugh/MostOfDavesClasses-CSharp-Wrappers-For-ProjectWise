@@ -11782,7 +11782,7 @@ public class PWSearch
         );
 
 
-    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsReturnWFStateSizeStorageMimeType")]
     private extern static int SearchForDocumentsReturningWorkflowStateSizesAsStrings(
         int iProjectId,
         bool bIncludeSubFolders,
@@ -11803,6 +11803,7 @@ public class PWSearch
         [Out] out IntPtr ppVersionSeqNumbers,
         [Out] out IntPtr ppWorkflowIds,
         [Out] out IntPtr ppStateIds,
+        [Out] out IntPtr ppStorageIds,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
             out string[] arDocumentGuidStrings,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11816,10 +11817,12 @@ public class PWSearch
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
             out string[] arVersions,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
-            out string[] arFileSizes
+            out string[] arFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
         );
 
-    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocumentsReturningWorkflowStateSizesAsStrings")]
+    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsReturnWFStateSizeStorageMimeType")]
     private extern static int SearchForDocumentsReturningWorkflowStateSizesAsStringsX64(
         int iProjectId,
         bool bIncludeSubFolders,
@@ -11840,6 +11843,7 @@ public class PWSearch
         [Out] out IntPtr ppVersionSeqNumbers,
         [Out] out IntPtr ppWorkflowIds,
         [Out] out IntPtr ppStateIds,
+        [Out] out IntPtr ppStorageIds,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
             out string[] arDocumentGuidStrings,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11853,10 +11857,12 @@ public class PWSearch
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
             out string[] arVersions,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
-            out string[] arFileSizes
+            out string[] arFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
         );
 
-    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsReturnWFStateSizeStorageMimeType")]
     private extern static int SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStrings(
         int iQueryId,
         [Out] out IntPtr ppProjects,
@@ -11864,6 +11870,7 @@ public class PWSearch
         [Out] out IntPtr ppVersionSeqNumbers,
         [Out] out IntPtr ppWorkflowIds,
         [Out] out IntPtr ppStateIds,
+        [Out] out IntPtr ppStorageIds,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
             out string[] arDocumentGuidStrings,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11877,11 +11884,13 @@ public class PWSearch
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
             out string[] arVersions,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
-            out string[] arFileSizes
+            out string[] arFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
         );
 
     [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStrings")]
-    private extern static int SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStringsX64(
+    private extern static int SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStringsX64_Old(
         int iQueryId,
         [Out] out IntPtr ppProjects,
         [Out] out IntPtr ppDocumentIds,
@@ -11904,6 +11913,33 @@ public class PWSearch
             out string[] arFileSizes
         );
 
+    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsByQueryIdReturnWFStateSizesStorageMimeType")]
+    private extern static int SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStringsX64(
+        int iQueryId,
+        [Out] out IntPtr ppProjects,
+        [Out] out IntPtr ppDocumentIds,
+        [Out] out IntPtr ppVersionSeqNumbers,
+        [Out] out IntPtr ppWorkflowIds,
+        [Out] out IntPtr ppStateIds,
+        [Out] out IntPtr ppStorageIds,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentGuidStrings,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentDescriptions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arVersions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
+        );
+    
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     private extern static int SearchForDocumentsWithStatesAndDates(
         int iProjectId,
@@ -13625,8 +13661,11 @@ public class PWSearch
         [Out] out IntPtr ppDocumentIds,
         [Out] out IntPtr ppVersionSeqNumbers,
         [Out] out IntPtr ppOriginalNumbers,
+        [Out] out IntPtr ppStorageIds,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
-            out string[] arDocumentFileNames
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
         );
 
     [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocumentsReturnFileNamesOriginalNos")]
@@ -13649,10 +13688,14 @@ public class PWSearch
         [Out] out IntPtr ppDocumentIds,
         [Out] out IntPtr ppVersionSeqNumbers,
         [Out] out IntPtr ppOriginalNumbers,
+        [Out] out IntPtr ppStorageIds,
         [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
-            out string[] arDocumentFileNames
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
         );
 
+    // added storageIds and MimeTypes to return 2019-04-16
     public static DataTable SearchForDocumentsReturnFileNamesAndOriginalNos(int iProjectId, bool bSearchSubFolders,
         string sFullText, bool bWholePhrase, bool bAnyWords, bool bSearchAttributes,
         string sDocumentName, string sFileName, string sDocumentDescription, bool bOriginalsOnly,
@@ -13663,10 +13706,12 @@ public class PWSearch
         IntPtr ppDocumentIds = IntPtr.Zero;
         IntPtr ppVersionSeqNumbers = IntPtr.Zero;
         IntPtr ppOriginalNumbers = IntPtr.Zero;
+        IntPtr ppStorageIds = IntPtr.Zero;
 
         int iCount = 0;
 
         string[] arDocumentFileNames = null;
+        string[] arMimeTypes = null;
 
         string[] arAttributeNames = new string[slAttributes.Count];
         string[] arAttributeValues = new string[slAttributes.Count];
@@ -13688,12 +13733,14 @@ public class PWSearch
                 iCount = SearchForDocumentsReturnFileNamesOriginalNosX64(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
                     bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
                     arAttributeNames, arAttributeValues, slAttributes.Count,
-                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppOriginalNumbers, out arDocumentFileNames);
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppOriginalNumbers, out ppStorageIds, 
+                    out arDocumentFileNames, out arMimeTypes);
             else
                 iCount = SearchForDocumentsReturnFileNamesOriginalNos(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
                     bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
                     arAttributeNames, arAttributeValues, slAttributes.Count,
-                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppOriginalNumbers, out arDocumentFileNames);
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppOriginalNumbers, out ppStorageIds, 
+                    out arDocumentFileNames, out arMimeTypes);
 
         }
         catch (Exception ex)
@@ -13717,6 +13764,8 @@ public class PWSearch
         dt.Columns.Add("DocumentId", Type.GetType("System.Int32"));
         dt.Columns.Add("ProjectPath", Type.GetType("System.String"));
         dt.Columns.Add("DocumentOriginalNumber", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentStorageId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentMimeType", Type.GetType("System.String"));
 
         DataColumn[] pk = new DataColumn[2];
         pk[0] = dt.Columns["ProjectId"];
@@ -13735,6 +13784,8 @@ public class PWSearch
             MarshalUnmananagedIntArrayToManagedIntArray(ppVersionSeqNumbers, iCount, out arDocumentVersionSequenceNumbers);
             int[] arDocumentOriginalNumbers = new int[iCount];
             MarshalUnmananagedIntArrayToManagedIntArray(ppOriginalNumbers, iCount, out arDocumentOriginalNumbers);
+            int[] arStorageIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
 
             for (int i = 0; i < iCount; i++)
             {
@@ -13745,6 +13796,8 @@ public class PWSearch
                 dr["DocumentFileName"] = arDocumentFileNames[i];
                 dr["DocumentVersionSequence"] = arDocumentVersionSequenceNumbers[i];
                 dr["DocumentOriginalNumber"] = arDocumentOriginalNumbers[i];
+                dr["DocumentStorageId"] = arStorageIds[i];
+                dr["DocumentMimeType"] = arMimeTypes[i];
 
                 if (bGetPath)
                 {
@@ -14176,7 +14229,7 @@ public class PWSearch
 
         IntPtr ppWorkflowIds = IntPtr.Zero;
         IntPtr ppStateIds = IntPtr.Zero;
-        // IntPtr ppFileSizes = IntPtr.Zero;
+        IntPtr ppStorageIds = IntPtr.Zero;
 
         int iCount = 0;
 
@@ -14187,6 +14240,7 @@ public class PWSearch
         string[] arDocumentUpdateDates = null;
         string[] arVersions = null;
         string[] arFileSizes = null;
+        string[] arMimeTypes = null;
 
         string[] arAttributeNames = new string[slAttributes.Count];
         string[] arAttributeValues = new string[slAttributes.Count];
@@ -14208,14 +14262,14 @@ public class PWSearch
                 iCount = SearchForDocumentsReturningWorkflowStateSizesAsStringsX64(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
                     bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
                     arAttributeNames, arAttributeValues, slAttributes.Count,
-                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
-                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes);
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out ppStorageIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes, out arMimeTypes);
             else
                 iCount = SearchForDocumentsReturningWorkflowStateSizesAsStrings(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
                     bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
                     arAttributeNames, arAttributeValues, slAttributes.Count,
-                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
-                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes);
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out ppStorageIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes, out arMimeTypes);
         }
         catch (Exception ex)
         {
@@ -14239,6 +14293,8 @@ public class PWSearch
         dt.Columns.Add("DocumentWorkflowId", Type.GetType("System.Int32"));
         dt.Columns.Add("DocumentStateId", Type.GetType("System.Int32"));
         dt.Columns.Add("DocumentFileSize", typeof(UInt64));
+        dt.Columns.Add("DocumentStorageId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentMimeType", Type.GetType("System.String"));
 
         DataColumn[] pk = new DataColumn[1];
         pk[0] = dt.Columns["DocumentGUID"];
@@ -14260,6 +14316,9 @@ public class PWSearch
             int[] arStateIds = new int[iCount];
             MarshalUnmananagedIntArrayToManagedIntArray(ppStateIds, iCount, out arStateIds);
 
+            int[] arStorageIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
+
             for (int i = 0; i < iCount; i++)
             {
                 DataRow dr = dt.NewRow();
@@ -14276,6 +14335,9 @@ public class PWSearch
 
                 dr["DocumentWorkflowId"] = arWorkflowIds[i];
                 dr["DocumentStateId"] = arStateIds[i];
+
+                dr["DocumentStorageId"] = arStorageIds[i];
+                dr["DocumentMimeType"] = arMimeTypes[i];
 
                 UInt64 uiFileSize = 0;
 
@@ -14328,7 +14390,7 @@ public class PWSearch
 
         IntPtr ppWorkflowIds = IntPtr.Zero;
         IntPtr ppStateIds = IntPtr.Zero;
-        // IntPtr ppFileSizes = IntPtr.Zero;
+        IntPtr ppStorageIds = IntPtr.Zero;
 
         int iCount = 0;
 
@@ -14339,6 +14401,7 @@ public class PWSearch
         string[] arDocumentUpdateDates = null;
         string[] arVersions = null;
         string[] arFileSizes = null;
+        string[] arMimeTypes = null;
 
         System.Diagnostics.Debug.WriteLine("Starting query...");
 
@@ -14346,14 +14409,14 @@ public class PWSearch
         {
             if (Is64Bit())
                 iCount = SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStringsX64(iQueryId,
-                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds,
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out ppStorageIds,
                     out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
-                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes);
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes, out arMimeTypes);
             else
                 iCount = SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStrings(iQueryId,
-                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds,
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out ppStorageIds,
                     out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
-                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes);
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes, out arMimeTypes);
 
         }
         catch (Exception ex)
@@ -14378,6 +14441,8 @@ public class PWSearch
         dt.Columns.Add("DocumentWorkflowId", Type.GetType("System.Int32"));
         dt.Columns.Add("DocumentStateId", Type.GetType("System.Int32"));
         dt.Columns.Add("DocumentFileSize", typeof(UInt64));
+        dt.Columns.Add("DocumentStorageId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentMimeType", Type.GetType("System.String"));
 
         DataColumn[] pk = new DataColumn[1];
         pk[0] = dt.Columns["DocumentGUID"];
@@ -14398,8 +14463,8 @@ public class PWSearch
             MarshalUnmananagedIntArrayToManagedIntArray(ppWorkflowIds, iCount, out arWorkflowIds);
             int[] arStateIds = new int[iCount];
             MarshalUnmananagedIntArrayToManagedIntArray(ppStateIds, iCount, out arStateIds);
-            // int[] arFileSizes = new int[iCount];
-            // MarshalUnmananagedIntArrayToManagedIntArray(ppFileSizes, iCount, out arFileSizes);
+            int[] arStorageIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
 
             for (int i = 0; i < iCount; i++)
             {
@@ -14417,6 +14482,9 @@ public class PWSearch
 
                 dr["DocumentWorkflowId"] = arWorkflowIds[i];
                 dr["DocumentStateId"] = arStateIds[i];
+
+                dr["DocumentStorageId"] = arStorageIds[i];
+                dr["DocumentMimeType"] = arMimeTypes[i];
 
                 UInt64 uiFileSize = 0;
                 UInt64.TryParse(arFileSizes[i], out uiFileSize);
