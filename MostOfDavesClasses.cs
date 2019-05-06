@@ -8054,6 +8054,20 @@ int lLenghtBuffer            /* i  Buffer length           */
             UserType = sUserType;
             Disabled = bDisabled;
         }
+
+        public ProjectWiseUser (int iID)
+        {
+            if (1 == PWWrapper.aaApi_SelectUser(iID))
+            {
+                ID = iID;
+                Name = PWWrapper.aaApi_GetUserStringProperty(UserProperty.Name, 0);
+                Description = PWWrapper.aaApi_GetUserStringProperty(UserProperty.Desc, 0);
+                SecurityProvider = PWWrapper.aaApi_GetUserStringProperty(UserProperty.SecProvider, 0);
+                EMail = PWWrapper.aaApi_GetUserStringProperty(UserProperty.Email, 0);
+                UserType = PWWrapper.aaApi_GetUserStringProperty(UserProperty.Type, 0);
+                Disabled = (1 == PWWrapper.aaApi_GetUserNumericProperty(UserProperty.Flags, 0));
+            }
+        }
     }
 
     public class ProjectWiseUserList
@@ -11862,7 +11876,7 @@ public class PWSearch
             out string[] arMimeTypes
         );
 
-    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsReturnWFStateSizeStorageMimeType")]
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsByQueryIdReturnWFStateSizesStorageMimeType")]
     private extern static int SearchForDocumentsByQueryIdReturningWorkflowStateSizesAsStrings(
         int iQueryId,
         [Out] out IntPtr ppProjects,
@@ -14527,6 +14541,269 @@ public class PWSearch
 
         return dt;
     }
+
+    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsWithSpatial")]
+    private extern static int SearchForDocsWithSpatialX64(
+        int iProjectId,
+        bool bIncludeSubFolders,
+        string sFullTextSearchString,
+        bool bWholePhrase,
+        bool bAnyWord,
+        bool bSearchAttributes, // otherwise full text
+        string sDocumentName,
+        string sFileName,
+        string sDocumentDescription,
+        bool bOriginalsOnly,
+        int iEnvironmentId,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+        int size,
+        double dLatitudeMin,
+        double dLongitudeMin,
+        double dLatitudeMax,
+        double dLongitudeMax,
+        bool bSpatialSecondPass,
+        [Out] out IntPtr ppProjects,
+        [Out] out IntPtr ppDocumentIds,
+        [Out] out IntPtr ppVersionSeqNumbers,
+        [Out] out IntPtr ppWorkflowIds,
+        [Out] out IntPtr ppStateIds,
+        [Out] out IntPtr ppStorageIds,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentGuidStrings,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentDescriptions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arVersions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
+        );
+
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsWithSpatial")]
+    private extern static int SearchForDocsWithSpatial(
+        int iProjectId,
+        bool bIncludeSubFolders,
+        string sFullTextSearchString,
+        bool bWholePhrase,
+        bool bAnyWord,
+        bool bSearchAttributes, // otherwise full text
+        string sDocumentName,
+        string sFileName,
+        string sDocumentDescription,
+        bool bOriginalsOnly,
+        int iEnvironmentId,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+        int size,
+        double dLatitudeMin,
+        double dLongitudeMin,
+        double dLatitudeMax,
+        double dLongitudeMax,
+        bool bSpatialSecondPass,
+        [Out] out IntPtr ppProjects,
+        [Out] out IntPtr ppDocumentIds,
+        [Out] out IntPtr ppVersionSeqNumbers,
+        [Out] out IntPtr ppWorkflowIds,
+        [Out] out IntPtr ppStateIds,
+        [Out] out IntPtr ppStorageIds,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentGuidStrings,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentDescriptions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arVersions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arMimeTypes
+        );
+
+    public static DataTable SearchForDocsWithSpatial(int iProjectId, bool bSearchSubFolders,
+        string sFullText, bool bWholePhrase, bool bAnyWords, bool bSearchAttributes,
+        string sDocumentName, string sFileName, string sDocumentDescription, bool bOriginalsOnly,
+        int iEnvironmentId,
+        SortedList<string, string> slAttributes,
+        double dLatitudeMin,
+        double dLongitudeMin,
+        double dLatitudeMax,
+        double dLongitudeMax,
+        bool bSpatialSecondPass,
+        bool bGetPath)
+    {
+        IntPtr ppProjects = IntPtr.Zero;
+        IntPtr ppDocumentIds = IntPtr.Zero;
+        IntPtr ppVersionSeqNumbers = IntPtr.Zero;
+
+        IntPtr ppWorkflowIds = IntPtr.Zero;
+        IntPtr ppStateIds = IntPtr.Zero;
+        IntPtr ppStorageIds = IntPtr.Zero;
+
+        int iCount = 0;
+
+        string[] arDocumentGuidStrings = null;
+        string[] arDocumentNames = null;
+        string[] arDocumentFileNames = null;
+        string[] arDocumentDescriptions = null;
+        string[] arDocumentUpdateDates = null;
+        string[] arVersions = null;
+        string[] arFileSizes = null;
+        string[] arMimeTypes = null;
+
+        string[] arAttributeNames = new string[slAttributes.Count];
+        string[] arAttributeValues = new string[slAttributes.Count];
+
+        int iIndex = 0;
+
+        foreach (KeyValuePair<string, string> kvp in slAttributes)
+        {
+            arAttributeNames[iIndex] = kvp.Key;
+            arAttributeValues[iIndex] = kvp.Value;
+            iIndex++;
+        }
+
+        System.Diagnostics.Debug.WriteLine("Starting query...");
+
+        try
+        {
+            if (Is64Bit())
+                iCount = SearchForDocsWithSpatialX64(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
+                    bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
+                    arAttributeNames, arAttributeValues, slAttributes.Count,
+                    dLatitudeMin, dLongitudeMin, dLatitudeMax, dLongitudeMax, bSpatialSecondPass,
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out ppStorageIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes, out arMimeTypes);
+            else
+                iCount = SearchForDocsWithSpatial(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
+                    bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
+                    arAttributeNames, arAttributeValues, slAttributes.Count,
+                    dLatitudeMin, dLongitudeMin, dLatitudeMax, dLongitudeMax, bSpatialSecondPass,
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out ppWorkflowIds, out ppStateIds, out ppStorageIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions, out arFileSizes, out arMimeTypes);
+        }
+        catch (Exception ex)
+        {
+            BPSUtilities.WriteLog("Error: {0}\n{1}", ex.Message, ex.StackTrace);
+        }
+
+        System.Diagnostics.Debug.WriteLine(string.Format("Returned {0} matches", iCount));
+
+        DataTable dt = new DataTable("Documents");
+
+        dt.Columns.Add("DocumentGUID", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentName", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentFileName", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentDescription", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentUpdateDate", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentVersion", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentVersionSequence", Type.GetType("System.Int32"));
+        dt.Columns.Add("ProjectId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentId", Type.GetType("System.Int32"));
+        dt.Columns.Add("ProjectPath", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentWorkflowId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentStateId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentFileSize", typeof(UInt64));
+        dt.Columns.Add("DocumentStorageId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentMimeType", Type.GetType("System.String"));
+
+        DataColumn[] pk = new DataColumn[1];
+        pk[0] = dt.Columns["DocumentGUID"];
+        dt.PrimaryKey = pk;
+
+        SortedList<int, string> slProjectPaths = new SortedList<int, string>();
+
+        if (iCount > 0)
+        {
+            int[] arProjects = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppProjects, iCount, out arProjects);
+            int[] arDocumentIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppDocumentIds, iCount, out arDocumentIds);
+            int[] arDocumentVersionSequenceNumbers = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppVersionSeqNumbers, iCount, out arDocumentVersionSequenceNumbers);
+
+            int[] arWorkflowIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppWorkflowIds, iCount, out arWorkflowIds);
+            int[] arStateIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppStateIds, iCount, out arStateIds);
+
+            int[] arStorageIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
+
+            for (int i = 0; i < iCount; i++)
+            {
+                DataRow dr = dt.NewRow();
+
+                dr["ProjectID"] = arProjects[i];
+                dr["DocumentID"] = arDocumentIds[i];
+                dr["DocumentGUID"] = arDocumentGuidStrings[i];
+                dr["DocumentName"] = arDocumentNames[i];
+                dr["DocumentFileName"] = arDocumentFileNames[i];
+                dr["DocumentDescription"] = arDocumentDescriptions[i];
+                dr["DocumentUpdateDate"] = arDocumentUpdateDates[i];
+                dr["DocumentVersion"] = arVersions[i];
+                dr["DocumentVersionSequence"] = arDocumentVersionSequenceNumbers[i];
+
+                dr["DocumentWorkflowId"] = arWorkflowIds[i];
+                dr["DocumentStateId"] = arStateIds[i];
+
+                dr["DocumentStorageId"] = arStorageIds[i];
+                dr["DocumentMimeType"] = arMimeTypes[i];
+
+                UInt64 uiFileSize = 0;
+
+                UInt64.TryParse(arFileSizes[i], out uiFileSize);
+
+                dr["DocumentFileSize"] = uiFileSize;
+
+                if (bGetPath)
+                {
+                    string sProjectPath = string.Empty;
+                    if (!slProjectPaths.TryGetValue(arProjects[i], out sProjectPath))
+                    {
+                        sProjectPath = PWWrapper.GetProjectNamePath2(arProjects[i]);
+                    }
+
+                    dr["ProjectPath"] = sProjectPath;
+                }
+
+                try
+                {
+                    dt.Rows.Add(dr);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(string.Format("Error: {0}\n{1}", ex.Message, ex.StackTrace));
+                }
+            }
+
+            // because I always forget the column names
+            StringBuilder sbColumns = new StringBuilder();
+
+            foreach (DataColumn dc in dt.Columns)
+            {
+                sbColumns.Append(dc.ColumnName + ";");
+            }
+
+            System.Diagnostics.Debug.WriteLine(string.Format("Columns: {0}", sbColumns.ToString()));
+        }
+
+        GC.Collect();
+
+        return dt;
+    }
 }
 
 public class BPSUtilities
@@ -16392,5 +16669,87 @@ public class XMLSpreadsheetDatasetTools
         }
 
         return ds;
+    }
+}
+
+public class SavedSearches
+{
+    //HAADMSBUFFER aaApi_SQueryDataBufferSelectSubItems2(LONG lParQueryId, LONG lUserId, LONG lProjectId )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_SQueryDataBufferSelectSubItems2(int lParQueryId, int lUserId, int lProjectId);
+
+    public static int GetSearchId(string sSearchName, bool bIsPersonal)
+    {
+        IntPtr iPtrBuffer = IntPtr.Zero;
+
+        int iSearchId = 0;
+
+        string sFolderPath = System.IO.Path.GetDirectoryName(sSearchName);
+
+        string sBareSearchName = System.IO.Path.GetFileName(sSearchName);
+
+        if (!string.IsNullOrEmpty(sFolderPath))
+        {
+            int iProjectID = -1;
+
+            iProjectID = PWWrapper.aaApi_GetProjectIdByNamePath(sFolderPath);
+
+            if (iProjectID > 0)
+            {
+                if (bIsPersonal)
+                {
+                    iPtrBuffer = aaApi_SQueryDataBufferSelectSubItems2(0, PWWrapper.aaApi_GetCurrentUserId(), iProjectID);
+                }
+                else
+                {
+                    iPtrBuffer = aaApi_SQueryDataBufferSelectSubItems2(0, 0, iProjectID);
+                }
+
+                int iCount = PWWrapper.aaApi_DmsDataBufferGetCount(iPtrBuffer);
+
+                for (int i = 0; i < iCount; i++)
+                {
+                    string s = PWWrapper.aaApi_DmsDataBufferGetStringProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRYC_PROP_PROPERTYNAME, i);
+                    int id = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRY_PROP_QUERYID, i);
+
+                    if (s.ToLower() == sBareSearchName.ToLower())
+                    {
+                        iSearchId = id;
+                        break;
+                    }
+                }
+
+                PWWrapper.aaApi_DmsDataBufferFree(iPtrBuffer);
+            }
+        }
+        else
+        {
+            if (bIsPersonal)
+            {
+                iPtrBuffer = aaApi_SQueryDataBufferSelectSubItems2(0, PWWrapper.aaApi_GetCurrentUserId(), 0);
+            }
+            else
+            {
+                iPtrBuffer = PWWrapper.aaApi_SQueryDataBufferSelectAll();
+            }
+
+            int iCount = PWWrapper.aaApi_DmsDataBufferGetCount(iPtrBuffer);
+
+            for (int i = 0; i < iCount; i++)
+            {
+                string s = PWWrapper.aaApi_DmsDataBufferGetStringProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRYC_PROP_PROPERTYNAME, i);
+                int id = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRY_PROP_QUERYID, i);
+
+                if (s.ToLower() == sBareSearchName.ToLower())
+                {
+                    iSearchId = id;
+                    break;
+                }
+            }
+
+            PWWrapper.aaApi_DmsDataBufferFree(iPtrBuffer);
+        }
+
+        return iSearchId;
     }
 }
