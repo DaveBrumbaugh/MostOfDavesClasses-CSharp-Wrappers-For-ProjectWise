@@ -5049,6 +5049,15 @@ string lpctstrDesc    /* i  Project description            */
         string sUserName, string sNewPassword, string sNewDescription,
         string sEMail);
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateUser2(ref int iUserId, 
+        string sUserType,
+        string sSecurityProvider,
+        string sUserName, 
+        string sNewPassword, 
+        string sNewDescription,
+        string sEMail,
+        string sIdentity);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_GetLinkDataColumnCount();
