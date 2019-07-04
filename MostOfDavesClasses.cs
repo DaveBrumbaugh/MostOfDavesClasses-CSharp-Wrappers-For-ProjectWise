@@ -8046,6 +8046,8 @@ int lLenghtBuffer            /* i  Buffer length           */
         public string EMail;// { get; set; }
         public string UserType;// { get; set; }
         public bool Disabled;// { get; set; }
+        public string Identity; // will populate in other function
+        public string IdentityProvider; // will populate in other function and add here later
 
         public ProjectWiseUser(int iID, string sName)
         {
