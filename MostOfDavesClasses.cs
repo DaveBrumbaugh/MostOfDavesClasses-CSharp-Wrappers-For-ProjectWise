@@ -1922,7 +1922,10 @@ public class PWWrapper
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_FreeLinkDataUpdateDesc();
 
-
+    /// <summary>
+    /// Get the basic datsource type. Returns 1 for Oracle, 2 for SQL Server, 0 for Unknown.
+    /// </summary>
+    /// <returns>1 for Oracle, 2 for SQL Server, 0 for Unknown</returns>
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_GetActiveDatasourceType();
 
@@ -1966,6 +1969,19 @@ int lNameSize      /* i  lptstrName size in characters      */
        string lpctstrValue,   /* i  Link column value (NULL for all) */
        ref int lplColumns      /* o  Number of columns in link table  */
     );
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_AddViewColumnToDataBuffer(IntPtr hColumnBuffer, ref Guid fieldType, string sContext,
+        int dataType, string fieldName, int alignment, int width);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateView(ref Guid viewType, int iUserId, string sViewName, string sContext, IntPtr hColumnBuffer, ref int iViewId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteView(int viewId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern void aaApi_SetDefaultViewCacheRefresh();
 
     public static string aaApi_GetDocumentStringProperty(DocumentProperty PropertyId, int Index)
     {
@@ -2486,10 +2502,18 @@ ref Guid pVersionDocGuid
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteEnvAttrDefs(int lEnvironmentId, int iTableId, int iColumnId);
 
-
-
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteEnvCodeDef(int lEnvironmentId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_InitializeEnvCodeDefUpdate();
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_UpdateEnvCodeDef(int iEnvironmentID);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_AddEnvCodeDefUpdateField(int iTableId, int iColumnId, int iCodeType, int iSerialType, 
+        int iParams, int iOrderNo, string sConnector);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteEnvTriggerDefs(int lEnvironmentId, int iTableId, int iColumnId, int iTriggerColumn);
@@ -5734,7 +5758,15 @@ DocumentCopyFlags ulFlags             /* i  Operation flags               */
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_GetEnvCodeDefNumericProperty(DocumentCodeDefinitionProperty propertyID, int index);
 
-    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_GetEnvCodeDefStringProperty", CharSet = CharSet.Unicode)]
+    private static extern IntPtr __aaApi_GetEnvCodeDefStringProperty(DocumentCodeDefinitionProperty property, int index);
+
+    public static string aaApi_GetEnvCodeDefStringProperty(DocumentCodeDefinitionProperty propertyID, int index)
+    {
+        return Marshal.PtrToStringUni(__aaApi_GetEnvCodeDefStringProperty(propertyID, index));
+    }
+
+   [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectEnvAttrDefs(int environmentID, int tableID, int columnID);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -8089,6 +8121,10 @@ int lLenghtBuffer            /* i  Buffer length           */
         public int ListType;// { get; set; }
         public int Owner;// { get; set; }
 
+        // [BMF Added on 07/21/2019]
+        public string ListTypeName;// { get; set; }
+        //public string OwnerName;// { get; set; }
+
         public ProjectWiseUserList(int iID, string sName)
         {
             ID = iID;
@@ -8103,6 +8139,18 @@ int lLenghtBuffer            /* i  Buffer length           */
             Owner = iOwner;
             ListType = iType;
         }
+
+        // [BMF Added on 07/21/2019]
+        public ProjectWiseUserList(int iID, string sName, string sDescription, int iOwner, int iType, string sType)
+        {
+            ID = iID;
+            Name = sName;
+            Descripion = sDescription;
+            ListType = iType;
+            ListTypeName = sType;
+            Owner = iOwner;
+        }
+
     }
 
     public class ProjectWiseGroup
