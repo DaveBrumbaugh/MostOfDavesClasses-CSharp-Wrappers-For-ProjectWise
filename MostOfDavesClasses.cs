@@ -2402,7 +2402,7 @@ ref Guid pVersionDocGuid
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
-    public static extern IntPtr aaApi_LogoutByHandle(IntPtr dsHandle);
+    public static extern bool aaApi_LogoutByHandle(IntPtr dsHandle);
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
