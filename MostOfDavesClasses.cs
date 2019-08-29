@@ -2570,6 +2570,12 @@ ref Guid pVersionDocGuid
         return Marshal.PtrToStringUni(unsafe_aaApi_GetEnvStringProperty(lPropertyId, lIndex));
     }
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaOApi_CopyClass
+    (
+        IntPtr pClassToCopy,                /* i Class to Copy  */
+        ref IntPtr ppCopiedClass                /* i  Interface id    */
+    );
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaOApi_SetClassLabel
@@ -4667,6 +4673,8 @@ uint lAccessMask       /* i  Access Mask                    */
     StringBuilder lptstrModTime     /* o  Modification time         */
     );
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaOApi_VersionizeClass(ref IntPtr pClass);
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -4723,6 +4731,12 @@ uint lAccessMask       /* i  Access Mask                    */
        int lAttributeId,            /* Specifies the attribute id, whose picklist class id to obtain.         */
        bool bSorted                 /* Specifies whether to sort the values or not. When set to TRUE the picklist values are sorted.  */
     );
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaOApi_LoadAllAttributes();
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaOApi_LoadAttribute(ref IntPtr attrP, int iAttrId);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaOApi_GetAttributePickListItemCount
@@ -16810,5 +16824,33 @@ public class SavedSearches
         }
 
         return iSearchId;
+    }
+}
+
+public static class Extensions
+{
+    public static bool AddWithCheck<TKey, TValue>(this SortedList<TKey, TValue> sortedList, TKey key, TValue value)
+    {
+        if (!sortedList.ContainsKey(key))
+        {
+            sortedList.Add(key, value);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool AddFormat<TKey>(this SortedList<TKey, string> sortedList,
+        TKey key,
+        string formatString,
+        params object[] argList)
+    {
+        if (!sortedList.ContainsKey(key))
+        {
+            sortedList.Add(key, string.Format(formatString, argList));
+            return true;
+        }
+
+        return false;
     }
 }
