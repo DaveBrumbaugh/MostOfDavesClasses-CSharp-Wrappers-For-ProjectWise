@@ -3422,7 +3422,11 @@ string lpctstrVersion  /* i  Project version to search for     */
         Project = 2,
         EnvironmentDocument = 3,
         Document = 4,
-        ODSComponent = 5
+        ODSComponent = 5,
+        AdminControl = 6,
+        Group = 7,
+        UserList = 8,
+        Transmittal = 9
     }
 
 
