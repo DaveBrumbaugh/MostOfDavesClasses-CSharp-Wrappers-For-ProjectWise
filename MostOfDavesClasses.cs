@@ -16844,6 +16844,21 @@ public static class Extensions
         return false;
     }
 
+    public static bool AddWithCheckNonZero(this SortedList<int, int> sortedList, int key, int value)
+    {
+        if (key != 0)
+        {
+            if (!sortedList.ContainsKey(key))
+            {
+                sortedList.Add(key, value);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     public static bool AddFormat<TKey>(this SortedList<TKey, string> sortedList,
         TKey key,
         string formatString,
