@@ -8560,6 +8560,9 @@ int lLenghtBuffer            /* i  Buffer length           */
 
     public static int GetStateId(string sStateName)
     {
+        if (string.IsNullOrEmpty(sStateName))
+            return 0;
+
         for (int i = 0; i < PWWrapper.aaApi_SelectAllStates(); i++)
         {
             string sCurrStateName = PWWrapper.aaApi_GetStateStringProperty(StateProperty.Name, i);
