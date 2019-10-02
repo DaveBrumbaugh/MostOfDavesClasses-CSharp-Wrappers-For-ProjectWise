@@ -2242,6 +2242,8 @@ int lNameSize      /* i  lptstrName size in characters      */
     public static extern bool aaApi_CheckOutDocument(int lProjectNo, int lDocumentId,
         string lpctstrWorkdir, StringBuilder lptstrFileName, int lBufferSize);
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_OpenDocument(int lProjectNo, int lDocumentId, bool bReadOnly);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_FetchDocumentFromServer
@@ -2512,7 +2514,7 @@ ref Guid pVersionDocGuid
     public static extern bool aaApi_UpdateEnvCodeDef(int iEnvironmentID);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_AddEnvCodeDefUpdateField(int iTableId, int iColumnId, int iCodeType, int iSerialType, 
+    public static extern bool aaApi_AddEnvCodeDefUpdateField(int iTableId, int iColumnId, int iCodeType, int iSerialType,
         int iParams, int iOrderNo, string sConnector);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -3891,6 +3893,28 @@ ref AaProjItem lpCriteria     /* i  Project select criteria    */
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_ImportDocuments([In]uint ulFlags, [In]int lCount, [In]AaDocItem[] pDocuments);
 
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_ExecuteDocumentCommand([In]uint ulCommandId, [In]int lCount, [In]AaDocItem[] pDocuments);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_SelectSetMembersDlgExt(IntPtr hWndParent,
+      string lpctstrTitle,
+      uint ulFlags,
+      int lProjectId,
+      int lDocumentId,
+      int lSetId,
+      ref uint lpulOptions,
+      ref int lpDocCount,
+      [Out] AaDocItem[] ppDocuments
+     );
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_SelectSetDlg(IntPtr hWndParent,
+      string lpctstrTitle,
+      uint ulSetFlags,
+      ref int lProjectId,
+      ref int lDocumentId
+     );
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_GetDocumentGUIDsByIds([In]int lCount, [In]AaDocItem[] pDocuments,
@@ -8020,6 +8044,17 @@ int lLenghtBuffer            /* i  Buffer length           */
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_GetStateId(int lIndex);
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteEnvValListItems(int lEnvironmentId, int lTableId, int lColumnId, int lValueId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnvValListItem(int lEnvironmentId,
+      int lTableId,
+      int lColumnId,
+      int lValueId,
+      string sListValue,
+      string sListValueDesc
+     );
 
     [DllImport("dmscli.dll", EntryPoint = "aaApi_GetStateStringProperty", CharSet = CharSet.Unicode)]
     private static extern IntPtr unsafe_aaApi_GetStateStringProperty(StateProperty PropertyId, int lIndex);
@@ -8046,6 +8081,17 @@ int lLenghtBuffer            /* i  Buffer length           */
         }
 
         return 0;
+    }
+
+    public static bool IsOracle()
+    {
+        //#define AADMS_DBTYPE_UNKNOWN   0 
+        //            Datasource database type is unknown.
+        //#define AADMS_DBTYPE_ORACLE   1 
+        //  Datasource database type is Oracle.
+        //#define AADMS_DBTYPE_SQLSERVER   2 
+        //  Datasource database type is Microsoft SQL Server.
+        return (1 == aaApi_GetActiveDatasourceType());
     }
 
     public static int GetWorkflowId(string sWorkflowName)
