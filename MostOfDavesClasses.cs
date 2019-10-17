@@ -5155,6 +5155,10 @@ string lpctstrDesc    /* i  Project description            */
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_SQueryDataBufferSelect(int iQueryId);
 
+    //HAADMSBUFFER aaApi_SQueryDataBufferSelectSubItems2(LONG lParQueryId, LONG lUserId, LONG lProjectId )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_SQueryDataBufferSelectSubItems2(int lParQueryId, int lUserId, int lProjectId);
+
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_SQueryCriDataBufferSelect(int iQueryId);
 
@@ -5183,10 +5187,22 @@ string lpctstrDesc    /* i  Project description            */
     //#define SQRYC_PROP_FIELDTYPE              9     /**< \b Numeric property. Value type from \ref aadmsdef_FormatUtilityDefinitions_AttributeTypes. */
     //#define SQRYC_PROP_FIELDVALUE            10     /**< \b String property. Value. */
 
-
     public enum SavedQueryProperty : int
     {
         SQRY_PROP_QUERYID = 1,
+        SQRY_PROP_USERID = 2,
+        SQRY_PROP_PQUERYID = 3,
+        SQRY_PROP_HASCRITERIA = 4,
+        SQRY_PROP_HASSUBITEMS = 5,
+        SQRY_PROP_NAME = 6,
+        SQRY_PROP_DESC = 7,
+        SQRY_PROP_PROJECTID = 8,
+        SQRY_PROP_FROMTYPE = 9
+    }
+
+    public enum SavedQueryCriterionProperty : int
+    {
+        SQRYC_PROP_QUERYID = 1,
         SQRYC_PROP_CRITERIONID = 2,
         SQRYC_PROP_ORGROUPNUMBER = 3,
         SQRYC_PROP_FLAGS = 4,
@@ -5197,6 +5213,7 @@ string lpctstrDesc    /* i  Project description            */
         SQRYC_PROP_FIELDTYPE = 9,
         SQRYC_PROP_FIELDVALUE = 10
     }
+
 
     [DllImport("dmscli.dll", EntryPoint = "aaApi_DmsDataBufferGetNumericProperty", CharSet = CharSet.Unicode)]
     public static extern int aaApi_DmsDataBufferGetNumericProperty(IntPtr hDataBuffer, int lPropertyId, int lIdxRow);
@@ -11682,12 +11699,12 @@ public class PWSearch
 
 
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-    private extern static int GetSavedSearchId(
+    public extern static int GetSavedSearchId(
             string sSearchName
         );
 
     [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetSavedSearchId")]
-    private extern static int GetSavedSearchIdX64(
+    public extern static int GetSavedSearchIdX64(
             string sSearchName
         );
 
@@ -16835,7 +16852,7 @@ public class SavedSearches
 
                 for (int i = 0; i < iCount; i++)
                 {
-                    string s = PWWrapper.aaApi_DmsDataBufferGetStringProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRYC_PROP_PROPERTYNAME, i);
+                    string s = PWWrapper.aaApi_DmsDataBufferGetStringProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRY_PROP_NAME, i);
                     int id = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRY_PROP_QUERYID, i);
 
                     if (s.ToLower() == sBareSearchName.ToLower())
@@ -16863,7 +16880,7 @@ public class SavedSearches
 
             for (int i = 0; i < iCount; i++)
             {
-                string s = PWWrapper.aaApi_DmsDataBufferGetStringProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRYC_PROP_PROPERTYNAME, i);
+                string s = PWWrapper.aaApi_DmsDataBufferGetStringProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRY_PROP_NAME, i);
                 int id = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtrBuffer, (int)PWWrapper.SavedQueryProperty.SQRY_PROP_QUERYID, i);
 
                 if (s.ToLower() == sBareSearchName.ToLower())
