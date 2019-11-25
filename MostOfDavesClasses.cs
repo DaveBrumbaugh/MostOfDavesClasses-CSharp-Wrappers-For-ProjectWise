@@ -2429,6 +2429,16 @@ ref Guid pVersionDocGuid
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectUsersByProp(string name, string description, string email);
 
+    [Flags]
+    public enum SetUserIdentityFlags : uint
+    {
+        DMS_USERIDENTITY_SETF_NONE = 0,
+        DMS_USERIDENTITY_SETF_DISASSOCIATE = 1,
+        DMS_USERIDENTITY_SETF_CLEAR_PROVIDER_DATA = 2
+    }
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_SetUserIdentity(int iUserId, SetUserIdentityFlags userIdentityFlags, string sIdentity);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_GetUserId(int index);
@@ -9250,13 +9260,14 @@ int lLenghtBuffer            /* i  Buffer length           */
         // I based the maximum length of the path value on the documentation of 
         // SetEnvironmentVariable
         int maxLength = 32767;
-
+#if true
         // this is my v8i support hack
         if (ConfigurationManager.AppSettings["Path"] != null)
         {
             Environment.SetEnvironmentVariable("Path", ConfigurationManager.AppSettings["Path"], EnvironmentVariableTarget.Process);
         }
         else
+#endif
         {
             StringBuilder currentPathBuffer = new StringBuilder(maxLength);
 
@@ -9422,7 +9433,7 @@ int lLenghtBuffer            /* i  Buffer length           */
     private static extern uint GetEnvironmentVariable(string name, StringBuilder valueBuffer, uint bufferSize);
 
 
-    #region UtilityFunctions
+#region UtilityFunctions
 
     public static bool SetNonStandardUserStringSettingByUser(int iUserId, int iParamNo, string sUserSetting)
     {
@@ -9748,7 +9759,7 @@ int lLenghtBuffer            /* i  Buffer length           */
         return slPropertyNamesProperyValues;
     }
 
-    #region MANAGED_WORKSPACE
+#region MANAGED_WORKSPACE
     public enum WorkspaceAssocObjectType : int
     {
         WORKSPACEOBJECTTYPE_INVALID = 0,
@@ -9801,7 +9812,7 @@ int lLenghtBuffer            /* i  Buffer length           */
         return Marshal.PtrToStringUni(__workspace_getDataBufferStringProperty(hWorkspaceBuffer, (int)propertyId, iIndex));
     }
 
-    #endregion
+#endregion
 
     public static SortedList<string, string> GetInstancePropertyValuesInList(int iClassId, int iInstanceId)
     {
@@ -11543,9 +11554,9 @@ int lLenghtBuffer            /* i  Buffer length           */
     }
 
 
-    #endregion
+#endregion
 
-    #region Views
+#region Views
 
     public static string aaApi_ViewGetName(IntPtr hView)
     {
@@ -11657,7 +11668,7 @@ int lLenghtBuffer            /* i  Buffer length           */
         return false;
     }
 
-    #endregion
+#endregion
 
 }
 
@@ -15294,11 +15305,13 @@ public class BPSUtilities
                 @"Bentley\Logs");
         }
 
+#if NET45
         // LogFolder setting should override
         if (!string.IsNullOrEmpty(GetSetting("LogFolder")))
         {
             sLogPath = GetSetting("LogFolder");
         }
+#endif
 
         if (string.IsNullOrEmpty(sLogPath))
         {
@@ -15413,6 +15426,7 @@ public class BPSUtilities
         return ht;
     }
 
+#if true
     /// <summary>Read integer setting from config file.</summary>
     /// <param name="sSettingName">string name of setting.</param>
     /// <returns>int configuration setting value.</returns>
@@ -15456,6 +15470,7 @@ public class BPSUtilities
 
         return bValue;
     }
+#endif
 
     /// <summary>Check if file is locked.</summary>
     /// <param name="sFileName">string full path to file.</param>
@@ -15488,6 +15503,8 @@ public class BPSUtilities
 
         return false;
     }
+
+#if true
 
     /// <summary>
     /// 
@@ -15569,6 +15586,7 @@ public class BPSUtilities
 
         return bValue;
     }
+#endif
 }
 
 public sealed class PWSession : IDisposable
@@ -15719,11 +15737,18 @@ public sealed class PWSession : IDisposable
     /// </summary>
     public PWSession()
     {
+#if true
         string sDatasourceName = BPSUtilities.GetSetting("PWDataSourceName");
         string sUserName = BPSUtilities.GetSetting("PWUser");
         string sPassword = BPSUtilities.GetSetting("PWPassword");
         bool bLoginAsAdmin = BPSUtilities.GetBooleanSetting("LoginAsAdmin");
-
+#else
+        string sDatasourceName = System.Environment.GetEnvironmentVariable("PWDataSourceName");
+        string sUserName = System.Environment.GetEnvironmentVariable("PWUser");
+        string sPassword = System.Environment.GetEnvironmentVariable("PWPassword");
+        bool bLoginAsAdmin = false;
+        bool.TryParse(System.Environment.GetEnvironmentVariable("LoginAsAdmin"), out bLoginAsAdmin);
+#endif
         if (string.IsNullOrEmpty(sDatasourceName))
         {
             LoggedInOK = false;
