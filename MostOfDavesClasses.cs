@@ -9308,9 +9308,13 @@ int lLenghtBuffer            /* i  Buffer length           */
                 /********  DESIRED VERSION - only need to change this line to update the *********
                  ********  PW verison that will be required by all components of RaDS    
                  ********  this is a minimum version requirement *********/
+                 // first version with 64-bit
                 Version minVersion = new Version("08.11");
-                string[] regKeys = new String[]{"SOFTWARE\\Bentley\\ProjectWise Explorer"
-                                                   };
+                string[] regKeys = new String[]{
+                    "SOFTWARE\\Bentley\\ProjectWise Explorer",
+                    // added for integration server only
+                    "SOFTWARE\\Bentley\\ProjectWise"
+                };
 
                 foreach (string regKeyPath in regKeys)
                 {
@@ -9325,26 +9329,33 @@ int lLenghtBuffer            /* i  Buffer length           */
                             for (int i = 0; i < versions.Length; i++)
                             {
                                 Microsoft.Win32.RegistryKey versionSubKey = regKey.OpenSubKey(versions[i]);
+
                                 if (versionSubKey == null)
                                     continue;
 
-                                string sVersion = (string)versionSubKey.GetValue("Version");
-                                if (sVersion == null)
-                                    continue;
-                                Version version = new Version(sVersion);
+                                //string sVersion = (string)versionSubKey.GetValue("Version");
+                                //if (sVersion == null)
+                                //    continue;
+                                Version version = new Version(versions[i]);
 
                                 if (version >= minVersion)
                                 {
                                     installDirectory = (string)versionSubKey.GetValue("PathName");
+
+                                    if (string.IsNullOrEmpty(installDirectory))
+                                    {
+                                        installDirectory = (string)versionSubKey.GetValue("Path");
+                                    }
+
                                     minVersion = version;
                                 }
                             }
-                            if (installDirectory != null)
+                            if (!string.IsNullOrEmpty(installDirectory))
                                 break;
                         }
                     }
                 }
-                if (installDirectory == null)
+                if (string.IsNullOrEmpty(installDirectory))
                     throw new ApplicationException("Registry search could not find installation directory for a ProjectWise version matching minimum required version '" +
                         minVersion + "'.\nMake sure a ProjectWise version matching the above version is installed on this system.");
             }
