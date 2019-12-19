@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<KeyinTree xmlns="http://www.bentley.com/schemas/1.0/MicroStation/AddIn/KeyinTree.xsd">
+  <RootKeyinTable ID="root">
+    <Keyword SubtableRef="Commands" CommandClass="MacroCommand"  CommandWord="SetPWVarsCE">
+      <Options Required="true" />
+    </Keyword>
+  </RootKeyinTable>
+    <SubKeyinTables>
+        <KeyinTable ID="Commands">
+          <Keyword CommandWord="Report"/>
+        </KeyinTable>
+    </SubKeyinTables>
+    <KeyinHandlers>
+      <KeyinHandler Keyin="SetPWVarsCE Report" Function="SetPWVarsCE.Keyins.SaveReport"/>
+    </KeyinHandlers>
+</KeyinTree>
