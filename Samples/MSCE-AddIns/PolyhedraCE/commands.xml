@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<KeyinTree xmlns="http://www.bentley.com/schemas/1.0/MicroStation/AddIn/KeyinTree.xsd">
+  <RootKeyinTable ID="root">
+    <Keyword SubtableRef="Commands" CommandClass="MacroCommand"  CommandWord="PolyhedraCE">
+      <Options Required="true" />
+    </Keyword>
+  </RootKeyinTable>
+    <SubKeyinTables>
+        <KeyinTable ID="Commands">
+          <Keyword CommandWord="Open"/>
+          <Keyword CommandWord="SnubCube"/>
+          <Keyword CommandWord="TruncatedIcosahedron"/>
+          <Keyword CommandWord="Icosahedron"/>
+          <Keyword CommandWord="Dodecahedron"/>
+          <Keyword CommandWord="TruncatedDodecahedron"/>
+          <Keyword CommandWord="SnubDodecahedron"/>
+        </KeyinTable>
+      <KeyinTable ID="Polyhdedra">
+      </KeyinTable>
+    </SubKeyinTables>
+    <KeyinHandlers>
+      <KeyinHandler Keyin="PolyhedraCE Open"  Function="PolyhedraCE.Keyins.OpenForm"/>
+      <KeyinHandler Keyin="PolyhedraCE SnubCube"  Function="PolyhedraCE.Keyins.SnubCube"/>
+      <KeyinHandler Keyin="PolyhedraCE TruncatedIcosahedron"  Function="PolyhedraCE.Keyins.TruncatedIcosahedron"/>
+      <KeyinHandler Keyin="PolyhedraCE Icosahedron"  Function="PolyhedraCE.Keyins.Icosahedron"/>
+      <KeyinHandler Keyin="PolyhedraCE Dodecahedron"  Function="PolyhedraCE.Keyins.Dodecahedron"/>
+      <KeyinHandler Keyin="PolyhedraCE TruncatedDodecahedron"  Function="PolyhedraCE.Keyins.TruncatedDodecahedron"/>
+      <KeyinHandler Keyin="PolyhedraCE SnubDodecahedron"  Function="PolyhedraCE.Keyins.SnubDodecahedron"/>
+    </KeyinHandlers>
+</KeyinTree>

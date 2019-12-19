@@ -1,0 +1,501 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<polyhedra>
+  <polyhedron name="SnubCube" vertices="24" faces="38" edges="60">
+    <vertices>
+    <vertex> 0.204    -0.691    -0.376</vertex>
+    <vertex> 0.691    -0.204     0.376</vertex>
+    <vertex> 0.691    -0.376    -0.204</vertex>
+    <vertex> 0.204    -0.376     0.691</vertex>
+    <vertex> 0.376     0.204     0.691</vertex>
+    <vertex> 0.376    -0.691     0.204</vertex>
+    <vertex> 0.204     0.691     0.376</vertex>
+    <vertex>-0.204     0.691    -0.376</vertex>
+    <vertex>-0.691     0.376    -0.204</vertex>
+    <vertex>-0.691    -0.204    -0.376</vertex>
+    <vertex>-0.376     0.204    -0.691</vertex>
+    <vertex>-0.376    -0.691    -0.204</vertex>
+    <vertex>-0.204    -0.376    -0.691</vertex>
+    <vertex> 0.376    -0.204    -0.691</vertex>
+    <vertex>-0.204    -0.691     0.376</vertex>
+    <vertex> 0.691     0.376     0.204</vertex>
+    <vertex>-0.376    -0.204     0.691</vertex>
+    <vertex>-0.691    -0.376     0.204</vertex>
+    <vertex>-0.691     0.204     0.376</vertex>
+    <vertex>-0.376     0.691     0.204</vertex>
+    <vertex>-0.204     0.376     0.691</vertex>
+    <vertex> 0.204     0.376    -0.691</vertex>
+    <vertex> 0.376     0.691    -0.204</vertex>
+    <vertex> 0.691     0.204    -0.376</vertex>
+    </vertices>
+    <faces>
+      <face RGB="204 153  51" vertexcount="4">4 20 16 3  </face>
+      <face RGB="204 153  51" vertexcount="4">5 14 11 0  </face>
+      <face RGB="204 153  51" vertexcount="4">15 1 2 23  </face>
+      <face RGB="0 204 153" vertexcount="3">14 3 16    </face>
+      <face RGB="10 204 153" vertexcount="3">14 5 3     </face>
+      <face RGB="20 204 153" vertexcount="3">3 5 1      </face>
+      <face RGB="30 204 153" vertexcount="3">3 1 4      </face>
+      <face RGB="40 204 153" vertexcount="3">4 1 15     </face>
+      <face RGB="50 204 153" vertexcount="3">5 2 1      </face>
+      <face RGB="60 204 153" vertexcount="3">5 0 2      </face>
+      <face RGB="204 153  51" vertexcount="4">10 21 13 12</face>
+      <face RGB="204 153  51" vertexcount="4">19 6 22 7  </face>
+      <face RGB="204 153  51" vertexcount="4">17 18 8 9  </face>
+      <face RGB="70 204 153" vertexcount="3">7 22 21    </face>
+      <face RGB="80 204 153" vertexcount="3">7 21 10    </face>
+      <face RGB="90 204 153" vertexcount="3">8 7 10     </face>
+      <face RGB="100 204 153" vertexcount="3">8 10 9     </face>
+      <face RGB="110 204 153" vertexcount="3">9 10 12    </face>
+      <face RGB="120 204 153" vertexcount="3">13 0 12    </face>
+      <face RGB="130 204 153" vertexcount="3">12 0 11    </face>
+      <face RGB="140 204 153" vertexcount="3">23 2 13    </face>
+      <face RGB="150 204 153" vertexcount="3">21 23 13   </face>
+      <face RGB="160 204 153" vertexcount="3">13 2 0     </face>
+      <face RGB="170 204 153" vertexcount="3">11 14 17   </face>
+      <face RGB="180 204 153" vertexcount="3">20 6 19    </face>
+      <face RGB="190 204 153" vertexcount="3">6 20 4     </face>
+      <face RGB="200 204 153" vertexcount="3">22 15 23   </face>
+      <face RGB="210 204 153" vertexcount="3">6 15 22    </face>
+      <face RGB="220 204 153" vertexcount="3">6 4 15     </face>
+      <face RGB="230 204 153" vertexcount="3">14 16 17   </face>
+      <face RGB="240 204 153" vertexcount="3">18 17 16   </face>
+      <face RGB="250 204 153" vertexcount="3">18 16 20   </face>
+      <face RGB="255 204 153" vertexcount="3">12 11 9    </face>
+      <face RGB="5 204 153" vertexcount="3">8 19 7     </face>
+      <face RGB="15 204 153" vertexcount="3">18 19 8    </face>
+      <face RGB="25 204 153" vertexcount="3">20 19 18   </face>
+      <face RGB="35 204 153" vertexcount="3">11 17 9    </face>
+      <face RGB="45 204 153" vertexcount="3">21 22 23   </face>
+    </faces>
+  </polyhedron>
+  <polyhedron name="TruncatedIcosahedron" vertices="60" faces="32" edges="0">
+    <vertices>
+      <vertex>-0.265     0.328    -0.695</vertex>
+      <vertex>-0.164    -0.796     0.000</vertex>
+      <vertex> 0.594    -0.531     0.164</vertex>
+      <vertex> 0.000     0.164     0.796</vertex>
+      <vertex>-0.164    -0.594     0.531</vertex>
+      <vertex>-0.796     0.000     0.164</vertex>
+      <vertex> 0.164    -0.594     0.531</vertex>
+      <vertex>-0.531     0.164    -0.594</vertex>
+      <vertex> 0.164     0.594    -0.531</vertex>
+      <vertex> 0.328     0.695    -0.265</vertex>
+      <vertex>-0.594    -0.531     0.164</vertex>
+      <vertex>-0.594     0.531    -0.164</vertex>
+      <vertex>-0.164    -0.594    -0.531</vertex>
+      <vertex>-0.265    -0.328    -0.695</vertex>
+      <vertex>-0.695    -0.265     0.328</vertex>
+      <vertex> 0.695     0.265     0.328</vertex>
+      <vertex>-0.164     0.796     0.000</vertex>
+      <vertex> 0.695     0.265    -0.328</vertex>
+      <vertex>-0.328     0.695     0.265</vertex>
+      <vertex>-0.695    -0.265    -0.328</vertex>
+      <vertex> 0.796     0.000     0.164</vertex>
+      <vertex> 0.265    -0.328     0.695</vertex>
+      <vertex> 0.695    -0.265    -0.328</vertex>
+      <vertex> 0.000    -0.164    -0.796</vertex>
+      <vertex> 0.000    -0.164     0.796</vertex>
+      <vertex> 0.164     0.594     0.531</vertex>
+      <vertex>-0.695     0.265    -0.328</vertex>
+      <vertex>-0.328     0.695    -0.265</vertex>
+      <vertex> 0.164    -0.796     0.000</vertex>
+      <vertex> 0.695    -0.265     0.328</vertex>
+      <vertex>-0.531    -0.164    -0.594</vertex>
+      <vertex> 0.531     0.164     0.594</vertex>
+      <vertex> 0.265     0.328     0.695</vertex>
+      <vertex> 0.594     0.531    -0.164</vertex>
+      <vertex>-0.594    -0.531    -0.164</vertex>
+      <vertex> 0.265    -0.328    -0.695</vertex>
+      <vertex> 0.328    -0.695     0.265</vertex>
+      <vertex> 0.796     0.000    -0.164</vertex>
+      <vertex>-0.531     0.164     0.594</vertex>
+      <vertex>-0.695     0.265     0.328</vertex>
+      <vertex>-0.265    -0.328     0.695</vertex>
+      <vertex> 0.594    -0.531    -0.164</vertex>
+      <vertex>-0.164     0.594     0.531</vertex>
+      <vertex>-0.265     0.328     0.695</vertex>
+      <vertex> 0.164     0.796     0.000</vertex>
+      <vertex>-0.531    -0.164     0.594</vertex>
+      <vertex> 0.265     0.328    -0.695</vertex>
+      <vertex> 0.164    -0.594    -0.531</vertex>
+      <vertex> 0.531     0.164    -0.594</vertex>
+      <vertex> 0.531    -0.164     0.594</vertex>
+      <vertex>-0.164     0.594    -0.531</vertex>
+      <vertex> 0.328     0.695     0.265</vertex>
+      <vertex> 0.594     0.531     0.164</vertex>
+      <vertex>-0.328    -0.695    -0.265</vertex>
+      <vertex> 0.000     0.164    -0.796</vertex>
+      <vertex>-0.796     0.000    -0.164</vertex>
+      <vertex> 0.531    -0.164    -0.594</vertex>
+      <vertex> 0.328    -0.695    -0.265</vertex>
+      <vertex>-0.328    -0.695     0.265</vertex>
+      <vertex>-0.594     0.531     0.164</vertex>
+    </vertices>
+    <faces>
+      <face RGB="255 255 255" vertexcount="6">7 0 54 23 13 30   </face>
+      <face RGB="253 253 253" vertexcount="6">51 25 42 18 16 44 </face>
+      <face RGB="80 80 80" vertexcount="5">18 59 11 27 16 	 </face>
+      <face RGB="251 251 251" vertexcount="6">31 32 3 24 21 49  </face>
+      <face RGB="80 80 80" vertexcount="5">48 17 37 22 56 	 </face>
+      <face RGB="249 249 249" vertexcount="6">28 1 53 12 47 57  </face>
+      <face RGB="80 80 80" vertexcount="5">21 24 40 4 6		 </face>
+      <face RGB="247 247 247" vertexcount="6">45 38 43 3 24 40  </face>
+      <face RGB="80 80 80" vertexcount="5">44 9 33 52 51 	 </face>
+      <face RGB="245 245 245" vertexcount="6">37 17 33 52 15 20 </face>
+      <face RGB="243 243 243" vertexcount="6">18 59 39 38 43 42 </face>
+      <face RGB="241 241 241" vertexcount="6">28 1 58 4 6 36  	 </face>
+      <face RGB="80 80 80" vertexcount="5">5 39 38 45 14 	 </face>
+      <face RGB="239 239 239" vertexcount="6">25 51 52 15 31 32 </face>
+      <face RGB="80 80 80" vertexcount="5">43 3 32 25 42 	 </face>
+      <face RGB="80 80 80" vertexcount="5">13 23 35 47 12 	 </face>
+      <face RGB="237 237 237" vertexcount="6">11 26 7 0 50 27   </face>
+      <face RGB="80 80 80" vertexcount="5">49 31 15 20 29 	 </face>
+      <face RGB="235 235 235" vertexcount="6">34 19 30 13 12 53 </face>
+      <face RGB="233 233 233" vertexcount="6">10 14 45 40 4 58  </face>
+      <face RGB="231 231 231" vertexcount="6">41 22 56 35 47 57 </face>
+      <face RGB="80 80 80" vertexcount="5">19 30 7 26 55 	 </face>
+      <face RGB="229 229 229" vertexcount="6">2 36 6 21 49 29   </face>
+      <face RGB="227 227 227" vertexcount="6">44 9 8 50 27 16   </face>
+      <face RGB="80 80 80" vertexcount="5">57 28 36 2 41 	 </face>
+      <face RGB="225 225 225" vertexcount="6">20 37 22 41 2 29  </face>
+      <face RGB="80 80 80" vertexcount="5">46 54 0 50 8	 </face>
+      <face RGB="223 223 223" vertexcount="6">26 11 59 39 5 55  </face>
+      <face RGB="221 221 221" vertexcount="6">5 55 19 34 10 14  </face>
+      <face RGB="80 80 80" vertexcount="5">53 1 58 10 34 	 </face>
+      <face RGB="219 219 219" vertexcount="6">48 46 54 23 35 56 </face>
+      <face RGB="217 217 217" vertexcount="6">9 8 46 48 17 33   </face>
+    </faces>
+  </polyhedron>
+  <polyhedron name="Icosahedron" vertices="12" faces="20" edges="0">
+    <vertices>
+      <vertex>-0.692     0.000     0.427</vertex>
+      <vertex> 0.000     0.427    -0.692</vertex>
+      <vertex> 0.000     0.427     0.692</vertex>
+      <vertex> 0.692     0.000    -0.427</vertex>
+      <vertex>-0.427    -0.692     0.000</vertex>
+      <vertex>-0.427     0.692     0.000</vertex>
+      <vertex> 0.000    -0.427     0.692</vertex>
+      <vertex> 0.427     0.692     0.000</vertex>
+      <vertex> 0.000    -0.427    -0.692</vertex>
+      <vertex> 0.692     0.000     0.427</vertex>
+      <vertex> 0.427    -0.692     0.000</vertex>
+      <vertex>-0.692     0.000    -0.427</vertex>
+    </vertices>
+    <faces>
+      <face RGB="0 155 155" vertexcount="3">9 2 6 </face>
+      <face RGB="10 160 150" vertexcount="3">1 5 11</face>
+      <face RGB="20 165 145" vertexcount="3">11 1 8</face>
+      <face RGB="30 170 140" vertexcount="3">0 11 4</face>
+      <face RGB="40 175 135" vertexcount="3">3 7 1 </face>
+      <face RGB="50 180 130" vertexcount="3">3 1 8 </face>
+      <face RGB="60 185 125" vertexcount="3">9 3 7 </face>
+      <face RGB="70 190 120" vertexcount="3">0 2 6 </face>
+      <face RGB="80 195 115" vertexcount="3">4 6 10</face>
+      <face RGB="90 200 110" vertexcount="3">1 7 5 </face>
+      <face RGB="100 205 105" vertexcount="3">7 2 5 </face>
+      <face RGB="110 210 100" vertexcount="3">8 10 3</face>
+      <face RGB="120 220 95" vertexcount="3">4 11 8</face>
+      <face RGB="130 225 90" vertexcount="3">9 2 7 </face>
+      <face RGB="140 230 85" vertexcount="3">10 6 9</face>
+      <face RGB="150 235 80" vertexcount="3">0 11 5</face>
+      <face RGB="160 240 75" vertexcount="3">0 2 5 </face>
+      <face RGB="170 245 70" vertexcount="3">8 10 4</face>
+      <face RGB="180 250 65" vertexcount="3">3 9 10</face>
+      <face RGB="190 255 60" vertexcount="3">6 4 0 </face>
+    </faces>
+  </polyhedron>
+  <polyhedron name="Dodecahedron" vertices="20" faces="12" edges="0">
+    <vertices>
+      <vertex> 0.469     0.469     0.469</vertex>
+      <vertex> 0.290     0.000     0.759</vertex>
+      <vertex>-0.759    -0.290     0.000</vertex>
+      <vertex> 0.759     0.290     0.000</vertex>
+      <vertex>-0.469     0.469    -0.469</vertex>
+      <vertex> 0.000    -0.759    -0.290</vertex>
+      <vertex>-0.759     0.290     0.000</vertex>
+      <vertex> 0.469    -0.469     0.469</vertex>
+      <vertex>-0.469     0.469     0.469</vertex>
+      <vertex>-0.469    -0.469     0.469</vertex>
+      <vertex> 0.469    -0.469    -0.469</vertex>
+      <vertex> 0.290     0.000    -0.759</vertex>
+      <vertex>-0.469    -0.469    -0.469</vertex>
+      <vertex> 0.000    -0.759     0.290</vertex>
+      <vertex> 0.000     0.759    -0.290</vertex>
+      <vertex>-0.290     0.000     0.759</vertex>
+      <vertex> 0.759    -0.290     0.000</vertex>
+      <vertex>-0.290     0.000    -0.759</vertex>
+      <vertex> 0.469     0.469    -0.469</vertex>
+      <vertex> 0.000     0.759     0.290</vertex>
+    </vertices>
+    <faces>
+      <face RGB="153  51 204" vertexcount="5">9 13 7 1 15 	</face>
+      <face RGB="255  0 0" vertexcount="5">6 4 14 19 8 	</face>
+      <face RGB="0  255 0" vertexcount="5">12 5 13 9 2 	</face>
+      <face RGB="0  0 255" vertexcount="5">6 2 12 17 4 	</face>
+      <face RGB="153  51 204" vertexcount="5">16 10 11 18 3</face>
+      <face RGB="255  0 0" vertexcount="5">19 8 15 1 0 	</face>
+      <face RGB="0  255 0" vertexcount="5">16 7 1 0 3  	</face>
+      <face RGB="0  0 255" vertexcount="5">5 12 17 11 10</face>
+      <face RGB="153  51 204" vertexcount="5">18 14 4 17 11</face>
+      <face RGB="255  51 204" vertexcount="5">16 10 5 13 7 </face>
+      <face RGB="153  255 204" vertexcount="5">2 6 8 15 9  	</face>
+      <face RGB="153  51 255" vertexcount="5">19 0 3 18 14 </face>
+    </faces>
+  </polyhedron>
+  <polyhedron name="TruncatedDodecahedron" vertices="60" faces="32" edges="0">
+    <vertices>
+      <vertex> 0.580     0.443     0.358</vertex>
+      <vertex>-0.358     0.580     0.443</vertex>
+      <vertex>-0.137    -0.717     0.358</vertex>
+      <vertex> 0.137     0.000     0.801</vertex>
+      <vertex> 0.580    -0.443     0.358</vertex>
+      <vertex> 0.137     0.717     0.358</vertex>
+      <vertex>-0.358    -0.580     0.443</vertex>
+      <vertex> 0.358    -0.580     0.443</vertex>
+      <vertex> 0.137    -0.717    -0.358</vertex>
+      <vertex> 0.137     0.717    -0.358</vertex>
+      <vertex>-0.801     0.137     0.000</vertex>
+      <vertex>-0.717    -0.358     0.137</vertex>
+      <vertex>-0.358    -0.137    -0.717</vertex>
+      <vertex> 0.000     0.801     0.137</vertex>
+      <vertex> 0.801     0.137     0.000</vertex>
+      <vertex>-0.137    -0.717    -0.358</vertex>
+      <vertex> 0.717    -0.358    -0.137</vertex>
+      <vertex>-0.137     0.000     0.801</vertex>
+      <vertex> 0.358    -0.580    -0.443</vertex>
+      <vertex>-0.358    -0.580    -0.443</vertex>
+      <vertex> 0.580     0.443    -0.358</vertex>
+      <vertex> 0.358    -0.137     0.717</vertex>
+      <vertex> 0.717     0.358    -0.137</vertex>
+      <vertex> 0.443    -0.358    -0.580</vertex>
+      <vertex>-0.358    -0.137     0.717</vertex>
+      <vertex> 0.801    -0.137     0.000</vertex>
+      <vertex> 0.137     0.000    -0.801</vertex>
+      <vertex>-0.137     0.000    -0.801</vertex>
+      <vertex>-0.580     0.443    -0.358</vertex>
+      <vertex> 0.717    -0.358     0.137</vertex>
+      <vertex>-0.580     0.443     0.358</vertex>
+      <vertex> 0.443     0.358     0.580</vertex>
+      <vertex>-0.137     0.717     0.358</vertex>
+      <vertex> 0.358     0.580    -0.443</vertex>
+      <vertex>-0.443    -0.358    -0.580</vertex>
+      <vertex> 0.580    -0.443    -0.358</vertex>
+      <vertex>-0.580    -0.443    -0.358</vertex>
+      <vertex> 0.358    -0.137    -0.717</vertex>
+      <vertex>-0.443     0.358     0.580</vertex>
+      <vertex>-0.717    -0.358    -0.137</vertex>
+      <vertex>-0.443     0.358    -0.580</vertex>
+      <vertex> 0.000    -0.801    -0.137</vertex>
+      <vertex> 0.358     0.137     0.717</vertex>
+      <vertex>-0.358     0.137     0.717</vertex>
+      <vertex> 0.443     0.358    -0.580</vertex>
+      <vertex>-0.443    -0.358     0.580</vertex>
+      <vertex> 0.443    -0.358     0.580</vertex>
+      <vertex>-0.580    -0.443     0.358</vertex>
+      <vertex> 0.000    -0.801     0.137</vertex>
+      <vertex> 0.358     0.137    -0.717</vertex>
+      <vertex>-0.717     0.358    -0.137</vertex>
+      <vertex> 0.137    -0.717     0.358</vertex>
+      <vertex> 0.717     0.358     0.137</vertex>
+      <vertex>-0.358     0.580    -0.443</vertex>
+      <vertex>-0.801    -0.137     0.000</vertex>
+      <vertex> 0.358     0.580     0.443</vertex>
+      <vertex>-0.137     0.717    -0.358</vertex>
+      <vertex>-0.358     0.137    -0.717</vertex>
+      <vertex> 0.000     0.801    -0.137</vertex>
+      <vertex>-0.717     0.358     0.137</vertex>
+    </vertices>
+    <faces>
+      <face RGB="123  21 170" vertexcount="10">53 56 58 13 32 1 30 59 50 28</face>
+      <face RGB="51 204 153" vertexcount="3">5 13 32</face>
+      <face RGB="133  31 180" vertexcount="10">23 37 26 27 12 34 19 15 8 18</face>
+      <face RGB="51 204 153" vertexcount="3">42 3 21</face>
+      <face RGB="51 204 153" vertexcount="3">19 34 36</face>
+      <face RGB="51 204 153" vertexcount="3">51 48 2</face>
+      <face RGB="51 204 153" vertexcount="3">37 26 49</face>
+      <face RGB="51 204 153" vertexcount="3">24 43 17</face>
+      <face RGB="51 204 153" vertexcount="3">57 27 12</face>
+      <face RGB="143  41 190" vertexcount="10">46 21 42 31 0 52 14 25 29 4</face>
+      <face RGB="153  51 204" vertexcount="10">10 54 11 47 45 24 43 38 30 59</face>
+      <face RGB="163  61 214" vertexcount="10">5 55 0 52 22 20 33 9 58 13</face>
+      <face RGB="173  71 224" vertexcount="10">41 48 51 7 4 29 16 35 18 8</face>
+      <face RGB="183  81 234" vertexcount="10">32 5 55 31 42 3 17 43 38 1</face>
+      <face RGB="193  91 244" vertexcount="10">45 24 17 3 21 46 7 51 2 6</face>
+      <face RGB="51 204 153" vertexcount="3">15 41 8</face>
+      <face RGB="51 204 153" vertexcount="3">30 38 1</face>
+      <face RGB="51 204 153" vertexcount="3">28 40 53</face>
+      <face RGB="113  11 160" vertexcount="10">39 36 34 12 57 40 28 50 10 54</face>
+      <face RGB="51 204 153" vertexcount="3">6 47 45</face>
+      <face RGB="51 204 153" vertexcount="3">9 56 58</face>
+      <face RGB="51 204 153" vertexcount="3">35 23 18</face>
+      <face RGB="51 204 153" vertexcount="3">29 16 25</face>
+      <face RGB="51 204 153" vertexcount="3">20 44 33</face>
+      <face RGB="51 204 153" vertexcount="3">22 52 14</face>
+      <face RGB="51 204 153" vertexcount="3">7 46 4</face>
+      <face RGB="51 204 153" vertexcount="3">55 0 31</face>
+      <face RGB="51 204 153" vertexcount="3">50 59 10</face>
+      <face RGB="51 204 153" vertexcount="3">39 11 54</face>
+      <face RGB="103  0 150" vertexcount="10">16 35 23 37 49 44 20 22 14 25</face>
+      <face RGB="93  51 140" vertexcount="10">48 41 15 19 36 39 11 47 6 2</face>
+      <face RGB="83  51 130" vertexcount="10">44 49 26 27 57 40 53 56 9 33</face>
+    </faces>
+  </polyhedron>
+  <polyhedron name="SnubDodecahedron" vertices="60" faces="92" edges="0">
+    <vertices>
+      <vertex> 0.408    -0.371     0.597</vertex>
+      <vertex>-0.146    -0.733     0.321</vertex>
+      <vertex>-0.227    -0.503     0.597</vertex>
+      <vertex> 0.630    -0.051     0.512</vertex>
+      <vertex>-0.652    -0.450     0.183</vertex>
+      <vertex>-0.081    -0.806    -0.065</vertex>
+      <vertex>-0.313    -0.678    -0.321</vertex>
+      <vertex> 0.652     0.365    -0.321</vertex>
+      <vertex> 0.227     0.759    -0.183</vertex>
+      <vertex> 0.243    -0.583    -0.512</vertex>
+      <vertex>-0.243     0.197     0.750</vertex>
+      <vertex> 0.479     0.274     0.597</vertex>
+      <vertex>-0.540    -0.329     0.512</vertex>
+      <vertex> 0.313    -0.016     0.750</vertex>
+      <vertex> 0.146    -0.615     0.512</vertex>
+      <vertex> 0.081    -0.302     0.750</vertex>
+      <vertex>-0.262    -0.171     0.750</vertex>
+      <vertex> 0.262    -0.747    -0.183</vertex>
+      <vertex>-0.408    -0.700     0.065</vertex>
+      <vertex>-0.652     0.450    -0.183</vertex>
+      <vertex> 0.112    -0.292    -0.750</vertex>
+      <vertex> 0.479    -0.274    -0.597</vertex>
+      <vertex> 0.408     0.371    -0.597</vertex>
+      <vertex>-0.227     0.503    -0.597</vertex>
+      <vertex> 0.630     0.051    -0.512</vertex>
+      <vertex> 0.146     0.615    -0.512</vertex>
+      <vertex> 0.081     0.302    -0.750</vertex>
+      <vertex>-0.540     0.329    -0.512</vertex>
+      <vertex>-0.112    -0.540    -0.597</vertex>
+      <vertex> 0.313     0.016    -0.750</vertex>
+      <vertex>-0.630    -0.479    -0.183</vertex>
+      <vertex>-0.742     0.088    -0.321</vertex>
+      <vertex>-0.792     0.172     0.065</vertex>
+      <vertex>-0.408     0.700    -0.065</vertex>
+      <vertex>-0.630     0.479     0.183</vertex>
+      <vertex>-0.112     0.540     0.597</vertex>
+      <vertex> 0.112     0.292     0.750</vertex>
+      <vertex>-0.479     0.412     0.512</vertex>
+      <vertex>-0.549     0.060     0.597</vertex>
+      <vertex> 0.549     0.507     0.321</vertex>
+      <vertex>-0.081     0.806     0.065</vertex>
+      <vertex> 0.540     0.605    -0.065</vertex>
+      <vertex> 0.742    -0.326    -0.065</vertex>
+      <vertex>-0.742    -0.088     0.321</vertex>
+      <vertex>-0.792    -0.171    -0.065</vertex>
+      <vertex> 0.742     0.326     0.065</vertex>
+      <vertex> 0.792    -0.019     0.183</vertex>
+      <vertex> 0.540    -0.605     0.065</vertex>
+      <vertex> 0.243     0.583     0.512</vertex>
+      <vertex> 0.652    -0.365     0.321</vertex>
+      <vertex> 0.227    -0.759     0.183</vertex>
+      <vertex>-0.313     0.678     0.321</vertex>
+      <vertex>-0.262     0.172    -0.750</vertex>
+      <vertex>-0.243    -0.197    -0.750</vertex>
+      <vertex>-0.549    -0.060    -0.597</vertex>
+      <vertex>-0.479    -0.412    -0.512</vertex>
+      <vertex>-0.146     0.733    -0.321</vertex>
+      <vertex> 0.549    -0.507    -0.321</vertex>
+      <vertex> 0.262     0.747     0.183</vertex>
+      <vertex> 0.792     0.019    -0.183</vertex>
+    </vertices>
+    <faces>
+      <face RGB="153  51 204" vertexcount="5">16 15 13 36 10</face>
+      <face RGB="153  51 204" vertexcount="5">18 1 2 12 4 	</face>
+      <face RGB="153  51 204" vertexcount="5">51 35 48 58 40</face>
+      <face RGB="153  51 204" vertexcount="5">39 11 3 46 45 </face>
+      <face RGB="153  51 204" vertexcount="5">47 49 0 14 50 </face>
+      <face RGB="153  51 204" vertexcount="5">43 38 37 34 32</face>
+      <face RGB="153  51 204" vertexcount="5">26 29 20 53 52</face>
+      <face RGB="153  51 204" vertexcount="5">33 56 23 27 19</face>
+      <face RGB="153  51 204" vertexcount="5">9 17 5 6 28 	</face>
+      <face RGB="153  51 204" vertexcount="5">59 42 57 21 24</face>
+      <face RGB="153  51 204" vertexcount="5">22 25 8 41 7 	</face>
+      <face RGB="153  51 204" vertexcount="5">31 54 55 30 44</face>
+      <face RGB="255 0 0" vertexcount="3">10 35 37</face>
+      <face RGB="0 255 0" vertexcount="3">36 11 48</face>
+      <face RGB="0 0 255" vertexcount="3">13 0 3  </face>
+      <face RGB="255 127 0" vertexcount="3">15 2 14 </face>
+      <face RGB="0 255 127" vertexcount="3">16 38 12</face>
+      <face RGB="127 0 255" vertexcount="3">51 33 34</face>
+      <face RGB="255 127 127" vertexcount="3">39 41 58</face>
+      <face RGB="127 255 127" vertexcount="3">49 42 46</face>
+      <face RGB="127 127 255" vertexcount="3">1 5 50  </face>
+      <face RGB="255 192 0" vertexcount="3">43 44 4 </face>
+      <face RGB="0 255 192" vertexcount="3">40 8 56 </face>
+      <face RGB="192 0 255" vertexcount="3">45 59 7 </face>
+      <face RGB="255 63 0" vertexcount="3">47 17 57</face>
+      <face RGB="0 255 63" vertexcount="3">18 30 6 </face>
+      <face RGB="63 0 255" vertexcount="3">32 19 31</face>
+      <face RGB="255 63 63" vertexcount="3">53 28 55</face>
+      <face RGB="63 255 63" vertexcount="3">20 21 9 </face>
+      <face RGB="63 63 255" vertexcount="3">29 22 24</face>
+      <face RGB="255 210 0" vertexcount="3">26 23 25</face>
+      <face RGB="0 255 210" vertexcount="3">52 54 27</face>
+      <face RGB="210 0 255" vertexcount="3">10 36 35</face>
+      <face RGB="255 23 0" vertexcount="3">36 13 11</face>
+      <face RGB="0 255 23" vertexcount="3">13 15 0 </face>
+      <face RGB="23 0 255" vertexcount="3">15 16 2 </face>
+      <face RGB="255 23 23" vertexcount="3">16 10 38</face>
+      <face RGB="23 255 23" vertexcount="3">48 35 36</face>
+      <face RGB="23 23 255" vertexcount="3">3 11 13 </face>
+      <face RGB="255 140 0" vertexcount="3">14 0 15 </face>
+      <face RGB="0 255 140" vertexcount="3">12 2 16 </face>
+      <face RGB="140 0 255" vertexcount="3">37 38 10</face>
+      <face RGB="255 140 140" vertexcount="3">35 51 37</face>
+      <face RGB="140 255 140" vertexcount="3">11 39 48</face>
+      <face RGB="140 140 255" vertexcount="3">0 49 3  </face>
+      <face RGB="255 150 0" vertexcount="3">2 1 14  </face>
+      <face RGB="0 255 150" vertexcount="3">38 43 12</face>
+      <face RGB="150 0 255" vertexcount="3">51 40 33</face>
+      <face RGB="255 150 150" vertexcount="3">39 45 41</face>
+      <face RGB="150 255 150" vertexcount="3">49 47 42</face>
+      <face RGB="150 150 255" vertexcount="3">1 18 5  </face>
+      <face RGB="255 220 0" vertexcount="3">43 32 44</face>
+      <face RGB="0 255 220" vertexcount="3">40 58 8 </face>
+      <face RGB="220 0 255" vertexcount="3">45 46 59</face>
+      <face RGB="255 220 220" vertexcount="3">47 50 17</face>
+      <face RGB="220 255 220" vertexcount="3">18 4 30 </face>
+      <face RGB="220 220 255" vertexcount="3">32 34 19</face>
+      <face RGB="255 10 0" vertexcount="3">58 48 39</face>
+      <face RGB="0 255 10" vertexcount="3">46 3 49 </face>
+      <face RGB="10 0 255" vertexcount="3">50 14 1 </face>
+      <face RGB="255 10 10" vertexcount="3">4 12 43 </face>
+      <face RGB="10 255 10" vertexcount="3">34 37 51</face>
+      <face RGB="10 10 255" vertexcount="3">53 20 28</face>
+      <face RGB="255 20 0" vertexcount="3">20 29 21</face>
+      <face RGB="0 255 20" vertexcount="3">29 26 22</face>
+      <face RGB="20 0 255" vertexcount="3">26 52 23</face>
+      <face RGB="255 20 20" vertexcount="3">52 53 54</face>
+      <face RGB="20 255 20" vertexcount="3">9 28 20 </face>
+      <face RGB="20 20 255" vertexcount="3">24 21 29</face>
+      <face RGB="255 30 0" vertexcount="3">25 22 26</face>
+      <face RGB="0 255 30" vertexcount="3">27 23 52</face>
+      <face RGB="30 0 255" vertexcount="3">55 54 53</face>
+      <face RGB="255 30 30" vertexcount="3">28 6 55 </face>
+      <face RGB="30 255 30" vertexcount="3">21 57 9 </face>
+      <face RGB="30 30 255" vertexcount="3">22 7 24 </face>
+      <face RGB="255 40 0" vertexcount="3">23 56 25</face>
+      <face RGB="0 255 40" vertexcount="3">54 31 27</face>
+      <face RGB="40 0 255" vertexcount="3">6 5 18  </face>
+      <face RGB="255 40 40" vertexcount="3">57 42 47</face>
+      <face RGB="40 255 40" vertexcount="3">7 41 45 </face>
+      <face RGB="40 40 255" vertexcount="3">56 33 40</face>
+      <face RGB="255 50 0" vertexcount="3">31 44 32</face>
+      <face RGB="0 255 50" vertexcount="3">5 17 50 </face>
+      <face RGB="50 0 255" vertexcount="3">42 59 46</face>
+      <face RGB="255 50 50" vertexcount="3">41 8 58 </face>
+      <face RGB="50 255 50" vertexcount="3">33 19 34</face>
+      <face RGB="50 50 255" vertexcount="3">44 30 4 </face>
+      <face RGB="255 60 0" vertexcount="3">17 9 57 </face>
+      <face RGB="0 255 60" vertexcount="3">59 24 7 </face>
+      <face RGB="60 0 255" vertexcount="3">8 25 56 </face>
+      <face RGB="255 60 60" vertexcount="3">19 27 31</face>
+      <face RGB="60 255 60" vertexcount="3">30 55 6 </face>
+    </faces>
+  </polyhedron>
+</polyhedra>
