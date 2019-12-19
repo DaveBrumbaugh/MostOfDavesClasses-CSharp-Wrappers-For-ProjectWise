@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{40CCE81F-87B0-4C06-8DA9-547705982D75}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QRCodeAddInForMSCE</RootNamespace>
+    <AssemblyName>QRCodeAddInForMSCE</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Bentley.DgnDisplayNet">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Bentley.DgnDisplayNet.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.DgnPlatformNET">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Bentley.DgnPlatformNET.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.ECObjects3">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\ECFramework\Bentley.ECObjects3.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.General.1.0">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\ECFramework\Bentley.General.1.0.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.GeometryNET">
+      <HintPath>C:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Bentley.GeometryNET.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.GeometryNET.Common">
+      <HintPath>C:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Bentley.GeometryNET.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.GeometryNET.Structs">
+      <HintPath>C:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Bentley.GeometryNET.Structs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.Interop.MicroStationDGN">
+      <HintPath>C:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\Bentley.Interop.MicroStationDGN.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Bentley.MicroStation">
+      <HintPath>C:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\Bentley.MicroStation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.MicroStation.General">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\Bentley.MicroStation.General.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.MicroStation.Interfaces.1.0">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\Bentley.MicroStation.Interfaces.1.0.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.Platform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4bf6c96a266e58d4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\ECFramework\Bentley.Platform.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.UI">
+      <HintPath>C:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\ECFramework\Bentley.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bentley.Windowing">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\ECFramework\Bentley.Windowing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="QRCodeEncoderLibrary">
+      <HintPath>..\QRCodeEncoder\QRCodeEncoderLibrary\bin\Debug\net461\QRCodeEncoderLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Messaging" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="ustation">
+      <HintPath>c:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\ustation.dll</HintPath>
+      <private>False</private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\MostOfDavesClasses\MostOfDavesClasses.cs">
+      <Link>MostOfDavesClasses.cs</Link>
+    </Compile>
+    <Compile Include="JSONHelper.cs" />
+    <Compile Include="PlaceQRCode.cs" />
+    <Compile Include="Keyins.cs" />
+    <Compile Include="QRCodeAddInForMSCE.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QRCodeImageFunctions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="commands.xml">
+      <LogicalName>CommandTable.xml</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="QRCodeEncoderLibrary.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="QRCodeAddInForMSCE.cfg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy QRCodeAddInForMSCE.dll "C:\Program Files\Bentley\MicroStation CONNECT Edition\MicroStation\Mdlapps"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
