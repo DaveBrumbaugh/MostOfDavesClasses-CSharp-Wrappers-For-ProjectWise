@@ -7114,7 +7114,6 @@ DocumentCopyFlags ulFlags              /* i  Flags for the operation       */
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_GetConnectedUsers(bool bRefresh, ref int iUsersP, ref int iUserCountP);
 
-
     [DllImport("dmscli.dll", EntryPoint = "aaApi_SelectConnectedUser", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectConnectedUser(int iUserId); // -1 for all
 
@@ -11685,6 +11684,82 @@ int lLenghtBuffer            /* i  Buffer length           */
 
 public class PWSearch
 {
+    // added per Dan 2020-01-17
+    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "CreateSearch")]
+    public static extern int CreateSearchX64
+          (
+              int iProjectId,
+              bool bIncludeSubVaults,
+              string wcFullTextString,
+              bool bWholePhrase,
+              bool bAnyWord, // otherwise all words
+              bool bSearchAttributes, // otherwise full text at this point
+              string szDocumentNameP,
+              string szFileNameP,
+              string szDocumentDescP,
+              bool bOriginalsOnly,
+              int iEnvId,
+              [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+              [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+              int iSize,
+              int iWorkflowId,
+              string szStatesP, // comma delimited states
+              string szUpdatedAfterP, // early date 2009-10-22 01:00:00
+              string szUpdatedBeforeP, // late date 2010-10-22 01:00:00
+             string szSavedSearchNameP,
+              int lParentProjectId,
+              int lParentQueryId,
+              string sViewName
+          );
+
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+    public static extern int CreateSearch
+    (
+        int iProjectId,
+        bool bIncludeSubVaults,
+        string wcFullTextString,
+        bool bWholePhrase,
+        bool bAnyWord, // otherwise all words
+        bool bSearchAttributes, // otherwise full text at this point
+        string szDocumentNameP,
+        string szFileNameP,
+        string szDocumentDescP,
+        bool bOriginalsOnly,
+        int iEnvId,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+        int iSize,
+        int iWorkflowId,
+        string szStatesP, // comma delimited states
+        string szUpdatedAfterP, // early date 2009-10-22 01:00:00
+        string szUpdatedBeforeP, // late date 2010-10-22 01:00:00
+        string szSavedSearchNameP,
+        int lParentProjectId,
+        int lParentQueryId,
+        string sViewName
+    );
+
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+    public static extern int CreateSearchFolder
+    (
+        string szSavedSearchNameP,
+        int lParentProjectId,
+        int lParentQueryId
+    );
+
+    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "CreateSearchFolder")]
+    public static extern int CreateSearchFolderX64
+    (
+        string szSavedSearchNameP,
+        int lParentProjectId,
+        int lParentQueryId
+    );
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_SQueryDelete(int iQueryId);
+
+    // above added per Dan 2020-01-17
+
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     private extern static int SearchForProjectsByProperties(
             string sProjectType,
