@@ -1399,6 +1399,58 @@ public class PWWrapper
         string sFileName
 );
 
+    [DllImport("DGNPlatformSCUtils.dll", CharSet = CharSet.Unicode)]
+    private static extern bool GetDgnFileType(string sFileName, ref int iFileType, ref int iMajorVersion, ref int iMinorVersion);
+
+    [DllImport("DGNPlatformSCUtilsX64.dll", CharSet = CharSet.Unicode, EntryPoint = "GetDgnFileType")]
+    private static extern bool GetDgnFileTypeX64(string sFileName, ref int iFileType, ref int iMajorVersion, ref int iMinorVersion);
+
+    private static void FixDgnPlatformPath()
+    {
+        string sPath = PWWrapper.GetProjectWisePath();
+        string sEnvPath = Environment.GetEnvironmentVariable("PATH");
+        sPath = $"{sPath}\\bin\\DgnPlatform";
+
+        if (!sEnvPath.ToLower().Contains(sPath.ToLower()))
+            System.Environment.SetEnvironmentVariable("PATH", string.Format("{0};{1}", sPath, sEnvPath), EnvironmentVariableTarget.Process);
+    }
+
+    public static int GetDgnFileType(string sFileName)
+    {
+        FixDgnPlatformPath();
+
+        try
+        {
+            int iFileType = 0, iMajorVersion = 0, iMinorVersion = 0;
+
+            if (PWWrapper.Is64Bit())
+            {
+                if (GetDgnFileTypeX64(sFileName, ref iFileType, ref iMajorVersion, ref iMinorVersion))
+                {
+                    BPSUtilities.WriteLog($"Type: {iFileType}, Major: {iMajorVersion}, Minor: {iMinorVersion}");
+                    return iFileType;
+                }
+
+                BPSUtilities.WriteLog($"Error: {iFileType}");
+            }
+            else
+            {
+                if (GetDgnFileType(sFileName, ref iFileType, ref iMajorVersion, ref iMinorVersion))
+                {
+                    BPSUtilities.WriteLog($"Type: {iFileType}, Major: {iMajorVersion}, Minor: {iMinorVersion}");
+                    return iFileType;
+                }
+
+                BPSUtilities.WriteLog($"Error: {iFileType}");
+            }
+        }
+        catch (Exception ex)
+        {
+            BPSUtilities.WriteLog($"{ex.Message}");
+        }
+
+        return 0;
+    }
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_DscTreeSelectSearchResultsItem
