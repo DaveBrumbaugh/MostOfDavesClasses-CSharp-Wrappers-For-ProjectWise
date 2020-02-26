@@ -11899,6 +11899,7 @@ public class PWSearch
 
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     private extern static int SearchForProjectsByClassId(
+            int iParentProjectId,
             int iClassId,
             [Out] out IntPtr ppProjects,
              [Out] out IntPtr ppComponentClassIds,
@@ -11919,6 +11920,7 @@ public class PWSearch
 
     [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForProjectsByClassId")]
     private extern static int SearchForProjectsByClassIdX64(
+            int iParentProjectId,
             int iClassId,
             [Out] out IntPtr ppProjects,
              [Out] out IntPtr ppComponentClassIds,
@@ -12687,7 +12689,7 @@ public class PWSearch
         return slProjects;
     }
 
-    public static DataTable GetAllProjectsByClass(string sClassName, bool bGetPath)
+    public static DataTable GetAllProjectsByClass(int iParentProjectId, string sClassName, bool bGetPath)
     {
         IntPtr ppProjects = IntPtr.Zero;
         IntPtr ppComponentClassIds = IntPtr.Zero;
@@ -12707,16 +12709,19 @@ public class PWSearch
         string[] arProjectDescriptions = null;
         string[] arProjectCodes = null;
 
-        int iClassId = PWWrapper.GetClassIdFromClassName(sClassName);
+        int iClassId = 0;
+
+        if (!string.IsNullOrEmpty(sClassName))
+            iClassId = PWWrapper.GetClassIdFromClassName(sClassName);
 
         if (Is64Bit())
-            SearchForProjectsByClassIdX64(iClassId, out ppProjects, out ppComponentClassIds,
+            SearchForProjectsByClassIdX64(iParentProjectId, iClassId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
                 out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
         else
-            SearchForProjectsByClassId(iClassId, out ppProjects, out ppComponentClassIds,
+            SearchForProjectsByClassId(iParentProjectId, iClassId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
                 out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
