@@ -7202,6 +7202,8 @@ int lStateId         /* i  State number                     */
         return Marshal.PtrToStringUni(unsafe_aaApi_GetProductVersionString());
     }
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_GetServerVersion(ref uint pRelease, ref uint pMajor, ref uint pMinor, ref uint pBuild);
 
     [DllImport("dmsgen.dll", EntryPoint = "aaApi_GetAPIVersion", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_GetAPIVersion(ref int iMajorVersionHi, ref int iMajorVersionLo,
@@ -11814,6 +11816,7 @@ public class PWSearch
 
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     private extern static int SearchForProjectsByProperties(
+            int iParentProjectId,
             string sProjectType,
             [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] propertyNames,
             [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] propertyValues,
@@ -11824,6 +11827,7 @@ public class PWSearch
 
     [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForProjectsByProperties")]
     private extern static int SearchForProjectsByPropertiesX64(
+            int iParentProjectId,
             string sProjectType,
             [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] propertyNames,
             [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] propertyValues,
@@ -11868,6 +11872,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11888,6 +11893,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11909,6 +11915,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11930,6 +11937,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11951,6 +11959,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11971,6 +11980,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -11992,6 +12002,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -12013,6 +12024,7 @@ public class PWSearch
              [Out] out IntPtr ppParentIds,
              [Out] out IntPtr ppStorageIds,
              [Out] out IntPtr ppIsParent,
+             [Out] out IntPtr ppProjectTypes,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectNames,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
@@ -12589,7 +12601,7 @@ public class PWSearch
         Marshal.FreeCoTaskMem(pUnmanagedIntArray);
     }
 
-    public static SortedList<int, string> GetListOfRichProjectsFromProperties(string sClassType, SortedList<string, string> slProps, bool bGetPath)
+    public static SortedList<int, string> GetListOfRichProjectsFromProperties(int iParentProjectId, string sClassType, SortedList<string, string> slProps, bool bGetPath)
     {
         SortedList<int, string> slProjects = new SortedList<int, string>();
 
@@ -12608,11 +12620,11 @@ public class PWSearch
         {
             if (Is64Bit())
             {
-                SearchForProjectsByPropertiesX64(sClassType, saPropNames, saPropValues, slProps.Count, out intPtrProjects, out iCount);
+                SearchForProjectsByPropertiesX64(iParentProjectId, sClassType, saPropNames, saPropValues, slProps.Count, out intPtrProjects, out iCount);
             }
             else
             {
-                SearchForProjectsByProperties(sClassType, saPropNames, saPropValues, slProps.Count, out intPtrProjects, out iCount);
+                SearchForProjectsByProperties(iParentProjectId, sClassType, saPropNames, saPropValues, slProps.Count, out intPtrProjects, out iCount);
             }
 
             if (iCount > 0 && intPtrProjects != IntPtr.Zero)
@@ -12699,6 +12711,7 @@ public class PWSearch
         IntPtr ppParentIds = IntPtr.Zero;
         IntPtr ppStorageIds = IntPtr.Zero;
         IntPtr ppIsParent = IntPtr.Zero;
+        IntPtr ppProjectTypes = IntPtr.Zero;
         IntPtr pppProjectNames = IntPtr.Zero;
         IntPtr pppProjectDescriptions = IntPtr.Zero;
         IntPtr pppProjectCodes = IntPtr.Zero;
@@ -12718,13 +12731,13 @@ public class PWSearch
             SearchForProjectsByClassIdX64(iParentProjectId, iClassId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
         else
             SearchForProjectsByClassId(iParentProjectId, iClassId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
 
 
@@ -12742,6 +12755,7 @@ public class PWSearch
         dt.Columns.Add("StorageID", Type.GetType("System.Int32"));
         dt.Columns.Add("IsParent", Type.GetType("System.Int32"));
         dt.Columns.Add("PWPath", Type.GetType("System.String"));
+        dt.Columns.Add("ProjectType", Type.GetType("System.Int32"));
 
         DataColumn[] pk = new DataColumn[1];
         pk[0] = dt.Columns["ProjectId"];
@@ -12768,6 +12782,8 @@ public class PWSearch
             MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
             int[] arIsParent = new int[iCount];
             MarshalUnmananagedIntArrayToManagedIntArray(ppIsParent, iCount, out arIsParent);
+            int[] arProjectTypes = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppProjectTypes, iCount, out arProjectTypes);
 
             for (int i = 0; i < iCount; i++)
             {
@@ -12784,7 +12800,7 @@ public class PWSearch
                 dr["ProjectName"] = arProjectNames[i];
                 dr["ProjectDescription"] = arProjectDescriptions[i];
                 dr["ProjectCode"] = arProjectCodes[i];
-
+                dr["ProjectType"] = arProjectTypes[i];
                 // if (bGetPath)
                 // dr["PWPath"] = PWWrapper.GetProjectNamePath(arProjects[i]);
 
@@ -12850,6 +12866,7 @@ public class PWSearch
         IntPtr pppProjectNames = IntPtr.Zero;
         IntPtr pppProjectDescriptions = IntPtr.Zero;
         IntPtr pppProjectCodes = IntPtr.Zero;
+        IntPtr ppProjectTypes = IntPtr.Zero;
 
         int iCount = 0;
 
@@ -12861,13 +12878,13 @@ public class PWSearch
             SearchForProjectsByTreeX64(iParentProjectId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
         else
             SearchForProjectsByTree(iParentProjectId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
 
         DataTable dt = new DataTable("Projects");
@@ -12884,6 +12901,7 @@ public class PWSearch
         dt.Columns.Add("StorageID", Type.GetType("System.Int32"));
         dt.Columns.Add("IsParent", Type.GetType("System.Int32"));
         dt.Columns.Add("PWPath", Type.GetType("System.String"));
+        dt.Columns.Add("ProjectType", Type.GetType("System.Int32"));
 
         DataColumn[] pk = new DataColumn[1];
         pk[0] = dt.Columns["ProjectId"];
@@ -12910,6 +12928,8 @@ public class PWSearch
             MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
             int[] arIsParent = new int[iCount];
             MarshalUnmananagedIntArrayToManagedIntArray(ppIsParent, iCount, out arIsParent);
+            int[] arProjectTypes = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppProjectTypes, iCount, out arProjectTypes);
 
             for (int i = 0; i < iCount; i++)
             {
@@ -12926,7 +12946,7 @@ public class PWSearch
                 dr["ProjectName"] = arProjectNames[i];
                 dr["ProjectDescription"] = arProjectDescriptions[i];
                 dr["ProjectCode"] = arProjectCodes[i];
-
+                dr["ProjectType"] = arProjectTypes[i];
                 // if (bGetPath)
                 // dr["PWPath"] = PWWrapper.GetProjectNamePath(arProjects[i]);
 
@@ -12992,6 +13012,7 @@ public class PWSearch
         IntPtr pppProjectNames = IntPtr.Zero;
         IntPtr pppProjectDescriptions = IntPtr.Zero;
         IntPtr pppProjectCodes = IntPtr.Zero;
+        IntPtr ppProjectTypes = IntPtr.Zero;
 
         int iCount = 0;
 
@@ -13003,13 +13024,13 @@ public class PWSearch
             SearchForProjectsByTreeAndEnvironmentX64(iParentProjectId, iEnvironmentId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
         else
             SearchForProjectsByTreeAndEnvironment(iParentProjectId, iEnvironmentId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
 
         DataTable dt = new DataTable("Projects");
@@ -13026,6 +13047,7 @@ public class PWSearch
         dt.Columns.Add("StorageID", Type.GetType("System.Int32"));
         dt.Columns.Add("IsParent", Type.GetType("System.Int32"));
         dt.Columns.Add("PWPath", Type.GetType("System.String"));
+        dt.Columns.Add("ProjectType", Type.GetType("System.Int32"));
 
         DataColumn[] pk = new DataColumn[1];
         pk[0] = dt.Columns["ProjectId"];
@@ -13052,6 +13074,8 @@ public class PWSearch
             MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
             int[] arIsParent = new int[iCount];
             MarshalUnmananagedIntArrayToManagedIntArray(ppIsParent, iCount, out arIsParent);
+            int[] arProjectTypes = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppProjectTypes, iCount, out arProjectTypes);
 
             for (int i = 0; i < iCount; i++)
             {
@@ -13068,7 +13092,7 @@ public class PWSearch
                 dr["ProjectName"] = arProjectNames[i];
                 dr["ProjectDescription"] = arProjectDescriptions[i];
                 dr["ProjectCode"] = arProjectCodes[i];
-
+                dr["ProjectType"] = arProjectTypes[i];
                 // if (bGetPath)
                 // dr["PWPath"] = PWWrapper.GetProjectNamePath(arProjects[i]);
 
@@ -13134,6 +13158,7 @@ public class PWSearch
         IntPtr pppProjectNames = IntPtr.Zero;
         IntPtr pppProjectDescriptions = IntPtr.Zero;
         IntPtr pppProjectCodes = IntPtr.Zero;
+        IntPtr ppProjectTypes = IntPtr.Zero;
 
         int iCount = 0;
 
@@ -13145,13 +13170,13 @@ public class PWSearch
             SearchForProjectsByTreeForEmptyFoldersX64(iParentProjectId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
         else
             SearchForProjectsByTreeForEmptyFolders(iParentProjectId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
-                out ppIsParent, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
                 out iCount);
 
         DataTable dt = new DataTable("Projects");
@@ -13168,6 +13193,7 @@ public class PWSearch
         dt.Columns.Add("StorageID", Type.GetType("System.Int32"));
         dt.Columns.Add("IsParent", Type.GetType("System.Int32"));
         dt.Columns.Add("PWPath", Type.GetType("System.String"));
+        dt.Columns.Add("ProjectType", Type.GetType("System.Int32"));
 
         DataColumn[] pk = new DataColumn[1];
         pk[0] = dt.Columns["ProjectId"];
@@ -13194,6 +13220,8 @@ public class PWSearch
             MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
             int[] arIsParent = new int[iCount];
             MarshalUnmananagedIntArrayToManagedIntArray(ppIsParent, iCount, out arIsParent);
+            int[] arProjectTypes = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppProjectTypes, iCount, out arProjectTypes);
 
             for (int i = 0; i < iCount; i++)
             {
@@ -13210,6 +13238,7 @@ public class PWSearch
                 dr["ProjectName"] = arProjectNames[i];
                 dr["ProjectDescription"] = arProjectDescriptions[i];
                 dr["ProjectCode"] = arProjectCodes[i];
+                dr["ProjectType"] = arProjectTypes[i];
 
                 // if (bGetPath)
                 // dr["PWPath"] = PWWrapper.GetProjectNamePath(arProjects[i]);
