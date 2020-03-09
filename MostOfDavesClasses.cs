@@ -1872,6 +1872,10 @@ public class PWWrapper
     public static extern bool aaApi_Login(int iDSType, string lptstrDataSource,
         string lpctstrUsername, string lpctstrPassword, string lpctstrSchema);
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_LoginWithSecurityToken(string dataSource, string securityToken, bool asAdmin, string hostname, long[] productIds);
+
+
     internal static Hashtable sessionHandles = new Hashtable();
 
     /// *****************************************************************************
@@ -15135,8 +15139,8 @@ public class PWSearch
 public class BPSUtilities
 {
 
-    public static string MIXED_CASE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-~1234567890";
-    public static string LOWER_CASE = "abcdefghijklmnopqrstuvwxyz_-~1234567890";
+    public static string MIXED_CASE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    public static string LOWER_CASE = "abcdefghijklmnopqrstuvwxyz1234567890";
 
 #if !IS_NET35
     public static string GetARandomString(int length, string characterSet)
@@ -15183,7 +15187,47 @@ public class BPSUtilities
     }
 #endif
 
+    public static string DecodeAndValidateToken(string sPossiblyEncodedToken)
+    {
+        try
+        {
+            System.IdentityModel.Tokens.SecurityToken token = null;
+            var handlers = System.IdentityModel.Tokens.SecurityTokenHandlerCollection.CreateDefaultSecurityTokenHandlerCollection();
 
+            if (sPossiblyEncodedToken.ToLower().StartsWith("token "))
+                sPossiblyEncodedToken = sPossiblyEncodedToken.Substring("token ".Length);
+
+            string sUnencodedToken = sPossiblyEncodedToken;
+
+            try
+            {
+                sUnencodedToken = Encoding.UTF8.GetString(Convert.FromBase64String(sPossiblyEncodedToken));
+            }
+            catch
+            {
+                sUnencodedToken = sPossiblyEncodedToken;
+            }
+
+            using (var reader = System.Xml.XmlReader.Create(new StringReader(sUnencodedToken)))
+            {
+                if (handlers.CanReadToken(reader))
+                    token = handlers.ReadToken(reader);
+            }
+
+            if (null != token)
+            {
+                // means the unencoded token was valid SAML
+                return sUnencodedToken;
+            }
+        }
+        catch (Exception ex)
+        {
+            BPSUtilities.WriteLog(ex.Message);
+        }
+
+        return string.Empty;
+    }
+    
     public static bool GetEmbeddedResourceFile(string sResourceName, string sTargetFile)
     {
         System.Reflection.Assembly thisExe = System.Reflection.Assembly.GetExecutingAssembly();
@@ -15770,7 +15814,7 @@ public sealed class PWSession : IDisposable
 
     private bool DoLogin(string sDatasourceName, string sUserName, string sPassword)
     {
-        PWWrapper.aaApi_Initialize(0);
+        PWWrapper.aaApi_Initialize(512);
 
         return (PWWrapper.aaApi_Login(PWWrapper.DataSourceType.Unknown,
             sDatasourceName, sUserName, sPassword, "", false));
@@ -15778,7 +15822,7 @@ public sealed class PWSession : IDisposable
 
     private bool DoAdminLogin(string sDatasourceName, string sUserName, string sPassword)
     {
-        PWWrapper.aaApi_Initialize(0);
+        PWWrapper.aaApi_Initialize(512);
 
         return (PWWrapper.aaApi_AdminLogin(PWWrapper.DataSourceType.Unknown,
             sDatasourceName, sUserName, sPassword));
@@ -15835,8 +15879,7 @@ public sealed class PWSession : IDisposable
 
         IsAdmin = PWWrapper.aaApi_HasAdminSetup();
     }
-
-
+    
     /// <summary>
     /// Constructor with all parameters passed, use unencrypted password.
     /// Throws exception if login unsuccessful.
@@ -15889,6 +15932,87 @@ public sealed class PWSession : IDisposable
 
             throw new Exception(string.Format("Error logging in to '{0}' with {1}, Error: {2}",
                 sDatasourceName, "SSO", PWWrapper.aaApi_GetLastErrorId()));
+        }
+        else
+        {
+            Datasource = sDatasourceName;
+            LoggedInOK = true;
+        }
+
+        IsAdmin = PWWrapper.aaApi_HasAdminSetup();
+    }
+
+    /// <summary>
+    /// Constructor which just takes a Token with datasource name and performs IMS login
+    /// Throws exception if login unsuccessful.
+    /// Throws exception if datasource name not set.
+    /// Throws exception if token not set.
+    /// </summary>
+    /// <param name="sDatasourceName"></param>
+    /// <param name="sPossiblyEncodedTokenWithOrWithoutPrefix"></param>
+    /// <param name="bDoAdminLogin"></param>
+    public PWSession(string sDatasourceName, string sPossiblyEncodedTokenWithOrWithoutPrefix, bool bDoAdminLogin)
+    {
+        if (string.IsNullOrEmpty(sPossiblyEncodedTokenWithOrWithoutPrefix))
+        {
+            LoggedInOK = false;
+            throw new Exception("Token not set");
+        }
+
+        if (string.IsNullOrEmpty(sDatasourceName))
+        {
+            LoggedInOK = false;
+            throw new Exception("Datasource not set");
+        }
+
+        string sValidatedToken = BPSUtilities.DecodeAndValidateToken(sPossiblyEncodedTokenWithOrWithoutPrefix);
+
+        if (string.IsNullOrEmpty(sValidatedToken))
+        {
+            // token was not valid SAML
+            if (sPossiblyEncodedTokenWithOrWithoutPrefix.Contains(":"))
+            {
+                string[] sParts = sPossiblyEncodedTokenWithOrWithoutPrefix.Split(":".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+                if (sParts.Length == 2)
+                {
+                    if (bDoAdminLogin)
+                    {
+                        if (!PWWrapper.aaApi_AdminLogin(PWWrapper.DataSourceType.Unknown, sDatasourceName, sParts[0], sParts[1]))
+                        {
+                            LoggedInOK = false;
+
+                            throw new Exception(string.Format("Error logging in to '{0}' with {1}, Error: {2}",
+                                sDatasourceName, "IMS Token", PWWrapper.aaApi_GetLastErrorId()));
+                        }
+                    }
+                    else
+                    {
+                        if (!PWWrapper.aaApi_Login(PWWrapper.DataSourceType.Unknown, sDatasourceName, sParts[0], sParts[1], string.Empty, true))
+                        {
+                            LoggedInOK = false;
+
+                            throw new Exception(string.Format("Error logging in to '{0}' with {1}, Error: {2}",
+                                sDatasourceName, "IMS Token", PWWrapper.aaApi_GetLastErrorId()));
+                        }
+                    }
+
+                    Datasource = sDatasourceName;
+                    LoggedInOK = true;
+                }
+            }
+            else
+            {
+                LoggedInOK = false;
+                throw new Exception("Invalid token");
+            }
+        }
+        else if (!PWWrapper.aaApi_LoginWithSecurityToken(sDatasourceName, sValidatedToken, bDoAdminLogin, null, null))
+        {
+            LoggedInOK = false;
+
+            throw new Exception(string.Format("Error logging in to '{0}' with {1}, Error: {2}",
+                sDatasourceName, "IMS Token", PWWrapper.aaApi_GetLastErrorId()));
         }
         else
         {
