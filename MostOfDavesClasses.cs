@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Xml;
+using System.Net.Http;
+using System.Net.Http.Headers;
 public class PWWrapper
 {
     static PWWrapper()
@@ -8376,6 +8378,78 @@ int lLenghtBuffer            /* i  Buffer length           */
         return slUsers;
     }
 
+    public static SortedList<string, PWWrapper.ProjectWiseUser> GetUsersByIdentity()
+    {
+        SortedList<string, PWWrapper.ProjectWiseUser> slUsers = new SortedList<string, PWWrapper.ProjectWiseUser>();
+
+        int iNumUsers = PWWrapper.aaApi_SelectAllUsers();
+
+        DataTable dt = PWWrapper.CreateDataTableFromSQLSelect("select o_userno, o_idpno, o_idname from dms_identity", "Identities");
+
+        SortedList<int, string> slUserIdsToIdentities = new SortedList<int, string>();
+
+        foreach (DataRow dr in dt.Rows)
+        {
+            if (!slUserIdsToIdentities.ContainsKey((int)dr["o_userno"]))
+                slUserIdsToIdentities.Add((int)dr["o_userno"], (string)dr["o_idname"]);
+        }
+
+        for (int i = 0; i < iNumUsers; i++)
+        {
+            string sName = PWWrapper.aaApi_GetUserStringProperty(PWWrapper.UserProperty.Name, i);
+            int iID = PWWrapper.aaApi_GetUserNumericProperty(PWWrapper.UserProperty.ID, i);
+            bool bDisabled = (1 == PWWrapper.aaApi_GetUserNumericProperty(PWWrapper.UserProperty.Flags, i));
+
+            if (slUserIdsToIdentities.ContainsKey(iID))
+            {
+                string sIdentity = slUserIdsToIdentities[iID];
+
+                if (!string.IsNullOrEmpty(sIdentity))
+                {
+                    slUsers.AddWithCheck(sIdentity, new PWWrapper.ProjectWiseUser(iID, sName,
+                                                        PWWrapper.aaApi_GetUserStringProperty(PWWrapper.UserProperty.Desc, i),
+                                                        PWWrapper.aaApi_GetUserStringProperty(PWWrapper.UserProperty.SecProvider, i),
+                                                        PWWrapper.aaApi_GetUserStringProperty(PWWrapper.UserProperty.Email, i),
+                                                        PWWrapper.aaApi_GetUserStringProperty(PWWrapper.UserProperty.Type, i),
+                                                        bDisabled)
+                    {
+                        Identity = sIdentity
+                    });
+                }
+            }
+        }
+
+        return slUsers;
+    }
+
+
+    public static SortedList<string, PWWrapper.ProjectWiseUser> GetUsersByEmail()
+    {
+        SortedList<string, ProjectWiseUser> slUsers = new SortedList<string, ProjectWiseUser>(StringComparer.InvariantCultureIgnoreCase);
+
+        int iNumUsers = PWWrapper.aaApi_SelectAllUsers();
+
+        for (int i = 0; i < iNumUsers; i++)
+        {
+            string sName = PWWrapper.aaApi_GetUserStringProperty(UserProperty.Name, i);
+            int iID = PWWrapper.aaApi_GetUserNumericProperty(UserProperty.ID, i);
+
+            string sEmail = PWWrapper.aaApi_GetUserStringProperty(UserProperty.Email, i);
+
+            bool bDisabled = (1 == PWWrapper.aaApi_GetUserNumericProperty(UserProperty.Flags, i));
+
+            slUsers.AddWithCheck(sEmail, new ProjectWiseUser(iID, sName,
+                PWWrapper.aaApi_GetUserStringProperty(UserProperty.Desc, i),
+                PWWrapper.aaApi_GetUserStringProperty(UserProperty.SecProvider, i),
+                PWWrapper.aaApi_GetUserStringProperty(UserProperty.Email, i),
+                PWWrapper.aaApi_GetUserStringProperty(UserProperty.Type, i),
+                bDisabled));
+        }
+
+        return slUsers;
+    }
+
+
     public static SortedList<string, PWWrapper.ProjectWiseUser> GetUsersByDomainAndUsername()
     {
         SortedList<string, ProjectWiseUser> slUsers = new SortedList<string, ProjectWiseUser>(StringComparer.InvariantCultureIgnoreCase);
@@ -9695,25 +9769,48 @@ int lLenghtBuffer            /* i  Buffer length           */
 
         if (1 == PWWrapper.aaApi_SelectEnv(iEnvId))
         {
-            int iAttrDefCount = PWWrapper.aaApi_SelectEnvAttrDefs(iEnvId, -1, -1);
+            int iTableId = PWWrapper.aaApi_GetEnvNumericProperty(EnvironmentProperty.TableID, 0);
 
-            for (int i = 0; i < iAttrDefCount; i++)
+            if (iTableId > 0)
             {
-                int iTableId = PWWrapper.aaApi_GetEnvAttrDefNumericProperty(AttributeDefinitionProperty.TableID, i);
-                int iColId = PWWrapper.aaApi_GetEnvAttrDefNumericProperty(AttributeDefinitionProperty.ColumnID, i);
+                int iNumCols = PWWrapper.aaApi_SelectColumnsByTable(iTableId);
 
-                if (1 == PWWrapper.aaApi_SelectColumn(iTableId, iColId))
+                for (int i = 0; i < iNumCols; i++)
                 {
-                    string sColumnName = PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, 0);
-
-                    if (!htAttrVals.ContainsKey(sColumnName.ToLower()))
-                        htAttrVals.Add(sColumnName.ToLower(), iColId);
+                    if (!htAttrVals.ContainsKey(PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, i).ToLower()))
+                        htAttrVals.Add(PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, i).ToLower(),
+                            PWWrapper.aaApi_GetColumnNumericProperty(ColumnProperty.ColumnID, i));
                 }
             }
         }
 
         return htAttrVals;
     }
+
+    public static SortedList<string, int> GetEnvironmentColumnsKeyedByName(int iEnvId)
+    {
+        SortedList<string, int> slColumns = new SortedList<string, int>(StringComparer.CurrentCultureIgnoreCase);
+
+        if (1 == PWWrapper.aaApi_SelectEnv(iEnvId))
+        {
+            int iTableId = PWWrapper.aaApi_GetEnvNumericProperty(EnvironmentProperty.TableID, 0);
+
+            if (iTableId > 0)
+            {
+                int iNumCols = PWWrapper.aaApi_SelectColumnsByTable(iTableId);
+
+                for (int i = 0; i < iNumCols; i++)
+                {
+                    slColumns.AddWithCheck(PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, i),
+                        PWWrapper.aaApi_GetColumnNumericProperty(ColumnProperty.ColumnID, i));
+                }
+
+            }
+        }
+
+        return slColumns;
+    }
+
 
     public static Hashtable GetProjectProperties(int iProjectId)
     {
@@ -15276,9 +15373,6 @@ public class BPSUtilities
 
         sOutputFileName = Path.Combine(sLogFolder, sOutputFileName);
 
-        //if (!string.IsNullOrEmpty(GetSetting("LogFolder")))
-        //    sOutputFileName = Path.Combine(GetSetting("LogFolder"), sOutputFileName);
-
         if (!string.IsNullOrEmpty(sOutputFileName))
         {
             try
@@ -15521,7 +15615,15 @@ public class BPSUtilities
                 @"Bentley\Logs");
         }
 
-#if NET45
+#if (NET45)
+        // LogFolder setting should override
+        if (!string.IsNullOrEmpty(GetSetting("LogFolder")))
+        {
+            sLogPath = GetSetting("LogFolder");
+        }
+#endif
+
+#if (USE_LOG_FOLDER_SETTING)
         // LogFolder setting should override
         if (!string.IsNullOrEmpty(GetSetting("LogFolder")))
         {
