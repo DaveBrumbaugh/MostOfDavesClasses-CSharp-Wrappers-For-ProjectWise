@@ -7768,6 +7768,9 @@ int lObjectId2To       /* i  Target access identifier 2        */
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_UpdateProjectWindows();
 
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_UpdateTreeItems(IntPtr handle);
+
     [Flags]
     public enum FindDscItemFlags : uint
     {
@@ -11980,6 +11983,8 @@ public class PWSearch
                     out string[] arProjectDescriptions,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectCodes,
+                [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+                    out string[] arProjectGuids,
              [Out] out int iCountP
         );
 
@@ -12001,6 +12006,8 @@ public class PWSearch
                     out string[] arProjectDescriptions,
                 [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
                     out string[] arProjectCodes,
+                [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+                    out string[] arProjectGuids,
              [Out] out int iCountP
         );
 
@@ -12450,8 +12457,10 @@ public class PWSearch
         [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
         int size,
         string sStates, // comma delimited state numbers
-        string sUpdatedAfter, // early date 2009-10-22 01:00:00
-        string sUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sFileUpdatedAfter, // early date 2009-10-22 01:00:00
+        string sFileUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sDocUpdatedAfter, // early date 2009-10-22 01:00:00 // added 2020-04-02
+        string sDocUpdatedBefore, // late date 2010-10-22 01:00:00 // added 2020-04-02
         [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arReturnColumns,
         int iReturnColumnsSize,
         string sDelimiter,
@@ -12490,8 +12499,10 @@ public class PWSearch
         [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
         int size,
         string sStates, // comma delimited state numbers
-        string sUpdatedAfter, // early date 2009-10-22 01:00:00
-        string sUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sFileUpdatedAfter, // early date 2009-10-22 01:00:00
+        string sFileUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sDocUpdatedAfter, // early date 2009-10-22 01:00:00 // added 2020-04-02
+        string sDocUpdatedBefore, // late date 2010-10-22 01:00:00 // added 2020-04-02
         [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arReturnColumns,
         int iReturnColumnsSize,
         string sDelimiter,
@@ -12974,18 +12985,21 @@ public class PWSearch
         string[] arProjectNames = null;
         string[] arProjectDescriptions = null;
         string[] arProjectCodes = null;
+        string[] arProjectGuids = null;
 
         if (Is64Bit())
             SearchForProjectsByTreeX64(iParentProjectId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
                 out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out arProjectGuids,
                 out iCount);
         else
             SearchForProjectsByTree(iParentProjectId, out ppProjects, out ppComponentClassIds,
                 out ppComponentInstanceIds, out ppEnvironmentIds, out ppWorkflowIds,
                 out ppParentIds, out ppStorageIds,
                 out ppIsParent, out ppProjectTypes, out arProjectNames, out arProjectDescriptions, out arProjectCodes,
+                out arProjectGuids,
                 out iCount);
 
         DataTable dt = new DataTable("Projects");
@@ -12994,6 +13008,7 @@ public class PWSearch
         dt.Columns.Add("ProjectDescription", Type.GetType("System.String"));
         dt.Columns.Add("ProjectCode", Type.GetType("System.String"));
         dt.Columns.Add("ProjectID", Type.GetType("System.Int32"));
+        dt.Columns.Add("ProjectGUID", Type.GetType("System.String"));
         dt.Columns.Add("ClassID", Type.GetType("System.Int32"));
         dt.Columns.Add("InstanceID", Type.GetType("System.Int32"));
         dt.Columns.Add("EnvironmentID", Type.GetType("System.Int32"));
@@ -13048,6 +13063,7 @@ public class PWSearch
                 dr["ProjectDescription"] = arProjectDescriptions[i];
                 dr["ProjectCode"] = arProjectCodes[i];
                 dr["ProjectType"] = arProjectTypes[i];
+                dr["ProjectGUID"] = arProjectGuids[i];
                 // if (bGetPath)
                 // dr["PWPath"] = PWWrapper.GetProjectNamePath(arProjects[i]);
 
@@ -13558,8 +13574,10 @@ public class PWSearch
         int iEnvironmentId,
         SortedList<string, string> slAttributes,
         List<int> listStates,
-        string sUpdatedAfter, // early date 2009-10-22 01:00:00
-        string sUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sFileUpdatedAfter, // early date 2009-10-22 01:00:00
+        string sFileUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sDocUpdatedAfter, // early date 2009-10-22 01:00:00 // added 2020-04-02
+        string sDocUpdatedBefore, // late date 2010-10-22 01:00:00 // added 2020-04-02
         bool bGetPath,
         List<string> listColumns)
     {
@@ -13615,8 +13633,10 @@ public class PWSearch
                     iEnvironmentId,
                     arAttributeNames, arAttributeValues, slAttributes.Count,
                     sStates,
-                    sUpdatedAfter,
-                    sUpdatedBefore,
+                    sFileUpdatedAfter,
+                    sFileUpdatedBefore,
+                    sDocUpdatedAfter,
+                    sDocUpdatedBefore,
                     arColumns, arColumns.Length,
                     sDelimiter,
                     out ppProjects, out ppDocumentIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
@@ -13627,8 +13647,10 @@ public class PWSearch
                     iEnvironmentId,
                     arAttributeNames, arAttributeValues, slAttributes.Count,
                     sStates,
-                    sUpdatedAfter,
-                    sUpdatedBefore,
+                    sFileUpdatedAfter,
+                    sFileUpdatedBefore,
+                    sDocUpdatedAfter,
+                    sDocUpdatedBefore,
                     arColumns, arColumns.Length,
                     sDelimiter,
                     out ppProjects, out ppDocumentIds, out arDocumentGuidStrings, out arDocumentNames, out arDocumentFileNames,
