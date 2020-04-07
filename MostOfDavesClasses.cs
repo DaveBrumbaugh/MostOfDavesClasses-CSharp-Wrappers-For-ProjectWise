@@ -51,7 +51,9 @@ public class PWWrapper
     }
 
     // dww - to support aaApi_ChangeDocumentFile4
-    public enum DocumentTypes : int
+
+    [Flags]
+    public enum DocumentFileOp : uint
     {
         AADMS_DOCUMENT_FILE_COMMAND = 0x0000000f,
         AADMS_DOCUMENT_FILE_REPLACE = 0x0,
