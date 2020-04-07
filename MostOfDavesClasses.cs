@@ -2477,8 +2477,9 @@ ref Guid pVersionDocGuid
     public static extern bool aaApi_ChangeDocumentFile(int vaultID, int documentID, string fileName);
 
     // dww
+    // changed opFlags type and fileMIME type to implement in/out for fileMIME
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_ChangeDocumentFile4(int vaultID, int documentID, uint opFlags, string sourcefile, string newfilename, string fileMIME);
+    public static extern bool aaApi_ChangeDocumentFile4(int vaultID, int documentID, DocumentFileOp opFlags, string sourcefile, string newfilename, StringBuilder fileMIME);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_RefreshDatasourceStatistics();
