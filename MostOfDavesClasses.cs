@@ -9,8 +9,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Xml;
-using System.Net.Http;
-using System.Net.Http.Headers;
+//using System.Net.Http;
+//using System.Net.Http.Headers;
 public class PWWrapper
 {
     static PWWrapper()
@@ -3445,6 +3445,8 @@ string lpctstrVersion  /* i  Project version to search for     */
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_IsCurrentUserAdmin();
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_IsUserRestrictedAdmin(int iUserId);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectAllGroups();
@@ -4380,6 +4382,75 @@ uint lAccessMask       /* i  Access Mask                    */
        int lGroupId,   /* i  Group number (-1 for all) */
        int lUserId     /* i  User number               */
     );
+
+    /// <summary>
+    /// Used to get member type name (User/Group/AccessList) from member type ID
+    /// </summary>
+    /// <param name="piType"></param>
+    /// <returns></returns>
+    public static string GetUserListOrGroupMemberTypeName(int piType)
+    {
+        string sMemberTypeName = string.Empty;
+
+        if (piType == 1) // User
+        {
+            sMemberTypeName = "User";
+        }
+        else if (piType == 2) // Group
+        {
+            sMemberTypeName = "Group";
+        }
+        else if (piType == 3) // Access List
+        {
+            sMemberTypeName = "UserList";
+        }
+        else if (piType == 4) // All_Users (*Everyone)
+        {
+            sMemberTypeName = "All_Users (*Everyone)";
+        }
+
+        return sMemberTypeName;
+    }
+
+    /// <summary>
+    /// Used to get the User/Group/AccessList Name from Type and ID
+    /// </summary>
+    /// <param name="piMemberID"></param>
+    /// <param name="piType"></param>
+    /// <returns></returns>
+    public static string GetUserListOrGroupMemberName(int piMemberID, int piType)
+    {
+        string sMemberName = string.Empty;
+
+        // PopulateMemberTypeSortedLists();
+
+        if (piType == 1) // User
+        {
+            if (1 == PWWrapper.aaApi_SelectUser(piMemberID))
+                sMemberName = PWWrapper.aaApi_GetUserStringProperty(UserProperty.Name, 0);
+        }
+        else if (piType == 2) // Group
+        {
+            if (1 == PWWrapper.aaApi_SelectGroup(piMemberID))
+                sMemberName = PWWrapper.aaApi_GetGroupStringProperty(GroupProperty.Name, 0);
+        }
+        else if (piType == 3) // Access List
+        {
+            if (1 == PWWrapper.aaApi_SelectUserList(piMemberID))
+                sMemberName = PWWrapper.aaApi_GetUserListStringProperty(UserListProperty.Name, 0);
+        }
+        else if (piType == 4) // All_Users (*Everyone)
+        {
+            sMemberName = "All_Users (*Everyone)";
+        }
+
+        return sMemberName;
+    }
+
+
+    // HAADMSBUFFER aaApi_SelectGroupMemberDataBufferById  ( LONG  lGroupId, LONG lUserId ) 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_SelectGroupMemberDataBufferById(int iGroupId, int iUserId);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_GetGroupMemberNumericProperty
@@ -6007,7 +6078,6 @@ DocumentCopyFlags ulFlags             /* i  Operation flags               */
     public static extern int aaApi_SelectUserListMembers(int lUsrLstId,  /* i  Access user list number   */
                 ManagerTypeProperty lMemType,         /* i  Member type               */
                 int lMemberId         /* i  Member id                 */);
-
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_RemoveUserFromGroup(int iGroupId, int iUserId);
@@ -8281,6 +8351,42 @@ int lLenghtBuffer            /* i  Buffer length           */
         public string ListTypeName;// { get; set; }
         //public string OwnerName;// { get; set; }
 
+        public DataTable GetMembers()
+        {
+            DataTable dt = new DataTable();
+
+            IntPtr iPtr = PWWrapper.aaApi_SelectUserListMemberDataBufferByProp(this.ID, -1, -1);
+            if (iPtr == IntPtr.Zero)
+            {
+                return dt;
+            }
+            int iCount = PWWrapper.aaApi_DmsDataBufferGetCount(iPtr);
+
+            dt.Columns.Add(new DataColumn("ID", typeof(int)));
+            dt.Columns.Add(new DataColumn("MemberType", typeof(string)));
+            dt.Columns.Add(new DataColumn("MemberName", typeof(string)));
+
+            for (int i = 0; i < iCount; i++)
+            {
+                int iMemberID = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, (int)PWWrapper.UserListMemberProperty.MemberID, i);
+                int iMemberType = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, (int)PWWrapper.UserListMemberProperty.MemberType, i);
+
+                string sMemberType = PWWrapper.GetUserListOrGroupMemberTypeName(iMemberType);
+                string sMemberName = PWWrapper.GetUserListOrGroupMemberName(iMemberID, iMemberType);
+
+                DataRow dr = dt.NewRow();
+
+                dr["ID"] = iMemberID;
+                dr["MemberType"] = sMemberType;
+                dr["MemberName"] = sMemberName;
+
+                dt.Rows.Add(dr);
+            }
+            PWWrapper.aaApi_DmsDataBufferFree(iPtr);
+
+            return dt;
+        }
+
         public ProjectWiseUserList(int iID, string sName)
         {
             ID = iID;
@@ -8307,41 +8413,6 @@ int lLenghtBuffer            /* i  Buffer length           */
             Owner = iOwner;
         }
 
-        public DataTable GetMembers()
-        {
-            DataTable dt = new DataTable();
-
-            IntPtr iPtr = PWPS_DAB.CommonUserMethods.aaApi_SelectUserListMemberDataBufferByProp(this.ID, -1, -1);
-            if (iPtr == IntPtr.Zero)
-            {
-                return dt;
-            }
-            int iCount = PWWrapper.aaApi_DmsDataBufferGetCount(iPtr);
-
-            dt.Columns.Add(new DataColumn("ID", typeof(int)));
-            dt.Columns.Add(new DataColumn("MemberType", typeof(string)));
-            dt.Columns.Add(new DataColumn("MemberName", typeof(string)));
-
-            for (int i = 0; i < iCount; i++)
-            {
-                int iMemberID = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, (int)PWWrapper.UserListMemberProperty.MemberID, i);
-                int iMemberType = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, (int)PWWrapper.UserListMemberProperty.MemberType, i);
-                
-                string sMemberType = PWPS_DAB.CommonAccessControlMethods.getMemberTypeName(iMemberType);
-                string sMemberName = PWPS_DAB.CommonAccessControlMethods.getMemberName(iMemberID, iMemberType);
-
-                DataRow dr = dt.NewRow();
-
-                dr["ID"] = iMemberID;
-                dr["MemberType"] = sMemberType;
-                dr["MemberName"] = sMemberName;
-
-                dt.Rows.Add(dr);
-            }
-            PWWrapper.aaApi_DmsDataBufferFree(iPtr);
-
-            return dt;
-        }
     }
 
     public class ProjectWiseGroup
@@ -8352,27 +8423,11 @@ int lLenghtBuffer            /* i  Buffer length           */
         public string GroupType;// { get; set; }
         public string SecurityProvider;// { get; set; }
 
-        public ProjectWiseGroup(int iID, string sName)
-        {
-            ID = iID;
-            Name = sName;
-        }
-
-        public ProjectWiseGroup(int iID, string sName, string sDescription, string sSecurityProvider,
-            string sType)
-        {
-            ID = iID;
-            Name = sName;
-            Descripion = sDescription;
-            SecurityProvider = sSecurityProvider;
-            GroupType = sType;
-        }
-
         public DataTable GetMembers()
         {
             DataTable dt = new DataTable();
 
-            IntPtr iPtr = PWPS_DAB.CommonUserMethods.aaApi_SelectGroupMemberDataBufferById(this.ID, -1);
+            IntPtr iPtr = PWWrapper.aaApi_SelectGroupMemberDataBufferById(this.ID, -1);
             if (iPtr == IntPtr.Zero)
             {
                 return dt;
@@ -8389,8 +8444,8 @@ int lLenghtBuffer            /* i  Buffer length           */
                 int iMemberType = 1;
                 int iMemberID = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, 2, i);
 
-                string sMemberType = PWPS_DAB.CommonAccessControlMethods.getMemberTypeName(iMemberType);
-                string sMemberName = PWPS_DAB.CommonAccessControlMethods.getMemberName(iMemberID, iMemberType);
+                string sMemberType = PWWrapper.GetUserListOrGroupMemberTypeName(iMemberType);
+                string sMemberName = PWWrapper.GetUserListOrGroupMemberName(iMemberID, iMemberType);
 
                 DataRow dr = dt.NewRow();
 
@@ -8400,10 +8455,27 @@ int lLenghtBuffer            /* i  Buffer length           */
 
                 dt.Rows.Add(dr);
             }
+
             PWWrapper.aaApi_DmsDataBufferFree(iPtr);
 
             return dt;
-        } 
+        }
+
+        public ProjectWiseGroup(int iID, string sName)
+        {
+            ID = iID;
+            Name = sName;
+        }
+
+        public ProjectWiseGroup(int iID, string sName, string sDescription, string sSecurityProvider,
+            string sType)
+        {
+            ID = iID;
+            Name = sName;
+            Descripion = sDescription;
+            SecurityProvider = sSecurityProvider;
+            GroupType = sType;
+        }
     }
 
     public static SortedList<string, PWWrapper.ProjectWiseApplication> GetApplicationsByName()
