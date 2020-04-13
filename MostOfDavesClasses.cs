@@ -8307,6 +8307,41 @@ int lLenghtBuffer            /* i  Buffer length           */
             Owner = iOwner;
         }
 
+        public DataTable GetMembers()
+        {
+            DataTable dt = new DataTable();
+
+            IntPtr iPtr = PWPS_DAB.CommonUserMethods.aaApi_SelectUserListMemberDataBufferByProp(this.ID, -1, -1);
+            if (iPtr == IntPtr.Zero)
+            {
+                return dt;
+            }
+            int iCount = PWWrapper.aaApi_DmsDataBufferGetCount(iPtr);
+
+            dt.Columns.Add(new DataColumn("ID", typeof(int)));
+            dt.Columns.Add(new DataColumn("MemberType", typeof(string)));
+            dt.Columns.Add(new DataColumn("MemberName", typeof(string)));
+
+            for (int i = 0; i < iCount; i++)
+            {
+                int iMemberID = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, (int)PWWrapper.UserListMemberProperty.MemberID, i);
+                int iMemberType = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, (int)PWWrapper.UserListMemberProperty.MemberType, i);
+                
+                string sMemberType = PWPS_DAB.CommonAccessControlMethods.getMemberTypeName(iMemberType);
+                string sMemberName = PWPS_DAB.CommonAccessControlMethods.getMemberName(iMemberID, iMemberType);
+
+                DataRow dr = dt.NewRow();
+
+                dr["ID"] = iMemberID;
+                dr["MemberType"] = sMemberType;
+                dr["MemberName"] = sMemberName;
+
+                dt.Rows.Add(dr);
+            }
+            PWWrapper.aaApi_DmsDataBufferFree(iPtr);
+
+            return dt;
+        }
     }
 
     public class ProjectWiseGroup
@@ -8332,6 +8367,43 @@ int lLenghtBuffer            /* i  Buffer length           */
             SecurityProvider = sSecurityProvider;
             GroupType = sType;
         }
+
+        public DataTable GetMembers()
+        {
+            DataTable dt = new DataTable();
+
+            IntPtr iPtr = PWPS_DAB.CommonUserMethods.aaApi_SelectGroupMemberDataBufferById(this.ID, -1);
+            if (iPtr == IntPtr.Zero)
+            {
+                return dt;
+            }
+            int iCount = PWWrapper.aaApi_DmsDataBufferGetCount(iPtr);
+
+            dt.Columns.Add(new DataColumn("ID", typeof(int)));
+            dt.Columns.Add(new DataColumn("MemberType", typeof(string)));
+            dt.Columns.Add(new DataColumn("MemberName", typeof(string)));
+
+            for (int i = 0; i < iCount; i++)
+            {
+
+                int iMemberType = 1;
+                int iMemberID = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(iPtr, 2, i);
+
+                string sMemberType = PWPS_DAB.CommonAccessControlMethods.getMemberTypeName(iMemberType);
+                string sMemberName = PWPS_DAB.CommonAccessControlMethods.getMemberName(iMemberID, iMemberType);
+
+                DataRow dr = dt.NewRow();
+
+                dr["ID"] = iMemberID;
+                dr["MemberType"] = sMemberType;
+                dr["MemberName"] = sMemberName;
+
+                dt.Rows.Add(dr);
+            }
+            PWWrapper.aaApi_DmsDataBufferFree(iPtr);
+
+            return dt;
+        } 
     }
 
     public static SortedList<string, PWWrapper.ProjectWiseApplication> GetApplicationsByName()
