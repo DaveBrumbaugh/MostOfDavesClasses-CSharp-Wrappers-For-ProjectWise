@@ -11,6 +11,9 @@ using System.Threading;
 using System.Xml;
 //using System.Net.Http;
 //using System.Net.Http.Headers;
+using System.Linq;
+using System.Globalization;
+
 public class PWWrapper
 {
     static PWWrapper()
@@ -1771,6 +1774,15 @@ public class PWWrapper
     }
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_SetAttributeSheetSelection(int iProjectId, int iDocumentId, int iAttrRecId);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_GetCurrentAttributeSheetDocument(ref int iProjectId, ref int iDocumentId, ref int iAttrRecId);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DocListSetMenuType(IntPtr hWndDocList, bool bShowMenu, bool bShowModify, bool bShowWorkflow, bool bShowView, bool bShowCustom);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_GetMainDocumentList();
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
@@ -1949,6 +1961,13 @@ public class PWWrapper
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern UInt64 aaApi_GetDocumentUint64Property(DocumentProperty PropertyId, int lIndex);
 
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_GetDocumentGuidProperty", CharSet = CharSet.Unicode)]
+    private static extern IntPtr intPtr_aaApi_GetDocumentGuidProperty(DocumentProperty lPropertyId, int lIdxRow);
+
+    public static Guid aaApi_GetDocumentGuidProperty(DocumentProperty PropertyId, int lIndex)
+    {
+        return (Guid)Marshal.PtrToStructure(intPtr_aaApi_GetDocumentGuidProperty(PropertyId, lIndex), Type.GetType("System.Guid"));
+    }
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern UInt64 aaApi_GetDatasourceStatisticsNumericProperty(DatasourceStatisticsProperty PropertyId);
@@ -1978,6 +1997,13 @@ public class PWWrapper
         int lDocumentId
         );
 
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_SelectLinksByAttr", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_SelectLinksByAttr
+        (
+        int iTableId,         /* i  Table  id                    */
+        int iColumnId,
+        string sAttrVal
+        );
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_FreeLinkDataUpdateDesc();
@@ -2302,7 +2328,7 @@ int lNameSize      /* i  lptstrName size in characters      */
     public static extern bool aaApi_CheckOutDocument(int lProjectNo, int lDocumentId,
         string lpctstrWorkdir, StringBuilder lptstrFileName, int lBufferSize);
 
-    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_OpenDocument(int lProjectNo, int lDocumentId, bool bReadOnly);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -2404,7 +2430,6 @@ ref Guid pVersionDocGuid
    int aaCBackData   /* i  Callback function parameter */
 );
 
-    // don't know if this works DAB 2012-12-09
     [DllImport("dmscli.dll", EntryPoint = "aaApi_CopyDocuments", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_CopyDocuments(
         int documentCount,
@@ -2663,6 +2688,9 @@ ref Guid pVersionDocGuid
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectEnvByProjectId(int lProjectId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_SelectEnvByTableId(int iTableId);
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -5727,6 +5755,25 @@ DocumentCopyFlags ulFlags             /* i  Operation flags               */
 );
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CopyDocument3
+(
+IntPtr hSrcDataSource,     /* i  Source datasource handle      */
+int lSourceProjectNo,   /* i  Source project number         */
+int lSourceDocumentId,  /* i  Source document number        */
+IntPtr hTrgtDataSource,    /* i  Target datasource handle      */
+int lTargetProjectNo,   /* i  Destination project number    */
+ref int lpTargetDocumentId, /* io Target document number        */
+string lpctstrWorkdir,     /* i  Working directory used in copy*/
+string lpctstrFileName,    /* i  File name for the copy        */
+string lpctstrName,        /* i  Name for the copy             */
+string lpctstrDesc,        /* i  Description for the copy      */
+DocumentCopyFlags ulFlags, /* i  Operation flags               */
+[Out] out IntPtr ppVersionDocuments /* should be a structure that looks like { int count, 
+                        [[int sourceProjId, int sourceDocId, int targetProjId, int targetDocId],[...]] */
+);
+
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_CopyDocument
 (
    int lSourceProjectNo,    /* i  Source project identifier     */
@@ -6990,6 +7037,9 @@ DocumentCopyFlags ulFlags              /* i  Flags for the operation       */
 
                     foreach (string sAttributeName in slPropertyNamesPropertyValues.Keys)
                     {
+                        if (string.IsNullOrEmpty(sAttributeName))
+                            continue;
+
                         string sAttributeValue = slPropertyNamesPropertyValues[sAttributeName];
 
                         int lAttribId = 0;
@@ -7847,7 +7897,6 @@ int lObjectId2To       /* i  Target access identifier 2        */
     [Flags]
     public enum FindDscItemFlags : uint
     {
-
         AAFINDDSCITEM_VISIBLE = 0x00000001,
         AAFINDDSCITEM_ITEMTYPE = 0x00000002,
         AAFINDDSCITEM_ITEMID = 0x00000004,
@@ -7856,7 +7905,8 @@ int lObjectId2To       /* i  Target access identifier 2        */
         AAFINDDSCITEM_ITEMDATA = 0x00000020,
         AAFINDDSCITEM_ALLVISIBLE = 0x00001000,
         AAFINDDSCITEM_AFFECTSPARENT = 0x00002000,
-        AAFINDDSCITEM_KEEPSELECTION = 0x00004000
+        AAFINDDSCITEM_KEEPSELECTION = 0x00004000,
+        AAFINDDSCITEM_RECURSIVE = 0x00008000,
     }
 
     public enum DscItemTypes : int
@@ -7936,6 +7986,13 @@ int lObjectId2To       /* i  Target access identifier 2        */
 );
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DscTreeEnsureVisibleHTreeItem
+(
+   IntPtr hWndTree,       /* i  Tree window handle         */
+   IntPtr lphItem         /* i  tree item to ensure visible       */
+);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_FindDscTreeItem
     (
    IntPtr hWndTree,       /* i  Tree window handle       */
@@ -7945,6 +8002,14 @@ int lObjectId2To       /* i  Target access identifier 2        */
    string lpctstrText,    /* i  Item text to search for  */
    FindDscItemFlags ulFlags         /* i  Search flags             */
         );
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_FindDscTreeItemByName
+    (
+   IntPtr hWndTree,       /* i  Tree window handle       */
+   string sDatasourceName    /* i  Datasource Name  */
+    );
+
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_ProjectTreeSelectItem(IntPtr hDscTree, int iProjectId);
@@ -8343,7 +8408,7 @@ int lLenghtBuffer            /* i  Buffer length           */
     {
         public int ID;// { get; set; }
         public string Name;// { get; set; }
-        public string Descripion;// { get; set; }
+        public string Description;// { get; set; }
         public int ListType;// { get; set; }
         public int Owner;// { get; set; }
 
@@ -8397,7 +8462,7 @@ int lLenghtBuffer            /* i  Buffer length           */
         {
             ID = iID;
             Name = sName;
-            Descripion = sDescription;
+            Description = sDescription;
             Owner = iOwner;
             ListType = iType;
         }
@@ -8407,7 +8472,7 @@ int lLenghtBuffer            /* i  Buffer length           */
         {
             ID = iID;
             Name = sName;
-            Descripion = sDescription;
+            Description = sDescription;
             ListType = iType;
             ListTypeName = sType;
             Owner = iOwner;
@@ -8417,11 +8482,11 @@ int lLenghtBuffer            /* i  Buffer length           */
 
     public class ProjectWiseGroup
     {
-        public int ID;// { get; set; }
-        public string Name;// { get; set; }
-        public string Descripion;// { get; set; }
-        public string GroupType;// { get; set; }
-        public string SecurityProvider;// { get; set; }
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string GroupType { get; set; }
+        public string SecurityProvider { get; set; }
 
         public DataTable GetMembers()
         {
@@ -8472,9 +8537,14 @@ int lLenghtBuffer            /* i  Buffer length           */
         {
             ID = iID;
             Name = sName;
-            Descripion = sDescription;
+            Description = sDescription;
             SecurityProvider = sSecurityProvider;
             GroupType = sType;
+        }
+
+        public ProjectWiseGroup()
+        {
+
         }
     }
 
@@ -8632,6 +8702,87 @@ int lLenghtBuffer            /* i  Buffer length           */
 
         return slUsers;
     }
+
+    public static bool IsUserIdInUserList(string sUserList, int iUserId)
+    {
+        int iNumUserLists = PWWrapper.aaApi_SelectAllUserLists();
+
+        for (int i = 0; i < iNumUserLists; i++)
+        {
+            if (sUserList.ToLower() == PWWrapper.aaApi_GetUserListStringProperty(UserListProperty.Name, i).ToLower())
+            {
+                SortedList<int, int> slUserListsVisited = new SortedList<int, int>();
+
+                if (IsUserIdInUserListId(PWWrapper.aaApi_GetUserListNumericProperty(UserListProperty.ID, i), 
+                        iUserId, ref slUserListsVisited))
+                    return true;
+
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsUserIdInUserListId(int iUserListID, int iUserId, ref SortedList<int, int> slUserLists)
+    {
+        // if already checked
+        if (!slUserLists.AddWithCheck(iUserListID, iUserListID))
+            return false;
+
+        IntPtr userBuf = aaApi_SelectUserListMemberDataBufferByProp(iUserListID, (int)ManagerTypeProperty.User, iUserId);
+
+        if (userBuf != IntPtr.Zero)
+        {
+            if (1 == PWWrapper.aaApi_DmsDataBufferGetCount(userBuf))
+            {
+                PWWrapper.aaApi_DmsDataBufferFree(userBuf);
+                return true;
+            }
+
+            PWWrapper.aaApi_DmsDataBufferFree(userBuf);
+        }
+
+        IntPtr groupBuf = PWWrapper.aaApi_SelectUserListMemberDataBufferByProp(iUserListID,
+            (int)ManagerTypeProperty.Group, -1);
+
+        if (groupBuf != IntPtr.Zero)
+        {
+            for (int j = 0; j < PWWrapper.aaApi_DmsDataBufferGetCount(groupBuf); j++)
+            {
+                if (PWWrapper.aaApi_SelectGroupMembers(
+                    PWWrapper.aaApi_DmsDataBufferGetNumericProperty(groupBuf, (int)UserListMemberProperty.MemberID, j), iUserId) > 0)
+                {
+                    PWWrapper.aaApi_DmsDataBufferFree(groupBuf);
+                    return true;
+                }
+            }
+
+            PWWrapper.aaApi_DmsDataBufferFree(groupBuf);
+        }
+
+        IntPtr userListBuf = PWWrapper.aaApi_SelectUserListMemberDataBufferByProp(iUserListID, 
+            (int)ManagerTypeProperty.UserList, -1);
+
+        if (userListBuf != IntPtr.Zero)
+        {
+            for (int k = 0; k < PWWrapper.aaApi_DmsDataBufferGetCount(userListBuf); k++)
+            {
+                if (IsUserIdInUserListId(
+                    PWWrapper.aaApi_DmsDataBufferGetNumericProperty(userListBuf, (int)UserListMemberProperty.MemberID, k), 
+                        iUserId, ref slUserLists))
+                {
+                    PWWrapper.aaApi_DmsDataBufferFree(userListBuf);
+                    return true;
+                }
+            }
+
+            PWWrapper.aaApi_DmsDataBufferFree(userListBuf);
+        }
+
+        return false;
+    }
+
 
     public static SortedList<string, PWWrapper.ProjectWiseUserList> GetUserListsByName()
     {
@@ -12356,6 +12507,67 @@ public class PWSearch
             out string[] arVersions
         );
 
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+    private extern static int SearchForDocumentsByItemType
+    (
+        int iProjectId,
+        bool bIncludeSubVaults,
+        int iItemType,
+        string szDocumentNameP,
+        string szFileNameP,
+        string szDocumentDescP,
+        bool bOriginalsOnly,
+        int iEnvId,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+        int size,
+        [Out] out IntPtr ppProjects,
+        [Out] out IntPtr ppDocumentIds,
+        [Out] out IntPtr ppVersionSeqNumbers,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentGuidStrings,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentDescriptions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arVersions
+    );
+
+    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocumentsByItemType")]
+    private extern static int SearchForDocumentsByItemTypeX64
+    (
+        int iProjectId,
+        bool bIncludeSubVaults,
+        int iItemType,
+        string szDocumentNameP,
+        string szFileNameP,
+        string szDocumentDescP,
+        bool bOriginalsOnly,
+        int iEnvId,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+        int size,
+        [Out] out IntPtr ppProjects,
+        [Out] out IntPtr ppDocumentIds,
+        [Out] out IntPtr ppVersionSeqNumbers,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentGuidStrings,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentDescriptions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arVersions
+    );
 
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocsReturnWFStateSizeStorageMimeType")]
     private extern static int SearchForDocumentsReturningWorkflowStateSizesAsStrings(
@@ -14248,6 +14460,144 @@ public class PWSearch
 
         return dt;
     }
+    public static DataTable SearchForDocumentsByItemType(int iProjectId, bool bSearchSubFolders,
+        string sDocumentName, string sFileName, string sDocumentDescription, bool bOriginalsOnly,
+        int iEnvironmentId,
+        SortedList<string, string> slAttributes, bool bGetPath, int iItemType = 12)
+    {
+        IntPtr ppProjects = IntPtr.Zero;
+        IntPtr ppDocumentIds = IntPtr.Zero;
+        IntPtr ppVersionSeqNumbers = IntPtr.Zero;
+
+        int iCount = 0;
+
+        string[] arDocumentGuidStrings = null;
+        string[] arDocumentNames = null;
+        string[] arDocumentFileNames = null;
+        string[] arDocumentDescriptions = null;
+        string[] arDocumentUpdateDates = null;
+        string[] arVersions = null;
+
+        string[] arAttributeNames = new string[slAttributes.Count];
+        string[] arAttributeValues = new string[slAttributes.Count];
+
+        int iIndex = 0;
+
+        foreach (KeyValuePair<string, string> kvp in slAttributes)
+        {
+            arAttributeNames[iIndex] = kvp.Key;
+            arAttributeValues[iIndex] = kvp.Value;
+            iIndex++;
+        }
+
+        System.Diagnostics.Debug.WriteLine("Starting query...");
+
+        try
+        {
+            if (Is64Bit())
+                iCount = SearchForDocumentsByItemTypeX64(iProjectId, bSearchSubFolders, iItemType, sDocumentName, 
+                    sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
+                    arAttributeNames, arAttributeValues, slAttributes.Count,
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out arDocumentGuidStrings, 
+                    out arDocumentNames, out arDocumentFileNames,
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions);
+            else
+                iCount = SearchForDocumentsByItemType(iProjectId, bSearchSubFolders, iItemType, sDocumentName, 
+                    sFileName, sDocumentDescription, bOriginalsOnly, iEnvironmentId,
+                    arAttributeNames, arAttributeValues, slAttributes.Count,
+                    out ppProjects, out ppDocumentIds, out ppVersionSeqNumbers, out arDocumentGuidStrings, 
+                    out arDocumentNames, out arDocumentFileNames,
+                    out arDocumentDescriptions, out arDocumentUpdateDates, out arVersions);
+        }
+        catch (Exception ex)
+        {
+            BPSUtilities.WriteLog("Error: {0}\n{1}", ex.Message, ex.StackTrace);
+
+            if (ex.InnerException != null)
+                BPSUtilities.WriteLog("Inner exception: {0}", ex.InnerException);
+        }
+
+        BPSUtilities.WriteLog("Returned {0} matches", iCount);
+
+        DataTable dt = new DataTable("Documents");
+
+        dt.Columns.Add("DocumentGUID", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentName", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentFileName", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentDescription", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentUpdateDate", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentVersion", Type.GetType("System.String"));
+        dt.Columns.Add("DocumentVersionSequence", Type.GetType("System.Int32"));
+        dt.Columns.Add("ProjectId", Type.GetType("System.Int32"));
+        dt.Columns.Add("DocumentId", Type.GetType("System.Int32"));
+        dt.Columns.Add("ProjectPath", Type.GetType("System.String"));
+
+        DataColumn[] pk = new DataColumn[1];
+        pk[0] = dt.Columns["DocumentGUID"];
+        dt.PrimaryKey = pk;
+
+        SortedList<int, string> slProjectPaths = new SortedList<int, string>();
+
+        if (iCount > 0)
+        {
+            int[] arProjects = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppProjects, iCount, out arProjects);
+            int[] arDocumentIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppDocumentIds, iCount, out arDocumentIds);
+            int[] arDocumentVersionSequenceNumbers = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppVersionSeqNumbers, iCount, out arDocumentVersionSequenceNumbers);
+
+            for (int i = 0; i < iCount; i++)
+            {
+                DataRow dr = dt.NewRow();
+
+                dr["ProjectID"] = arProjects[i];
+                dr["DocumentID"] = arDocumentIds[i];
+                dr["DocumentGUID"] = arDocumentGuidStrings[i];
+                dr["DocumentName"] = arDocumentNames[i];
+                dr["DocumentFileName"] = arDocumentFileNames[i];
+                dr["DocumentDescription"] = arDocumentDescriptions[i];
+                dr["DocumentUpdateDate"] = arDocumentUpdateDates[i];
+                dr["DocumentVersion"] = arVersions[i];
+                dr["DocumentVersionSequence"] = arDocumentVersionSequenceNumbers[i];
+
+                if (bGetPath)
+                {
+                    string sProjectPath = string.Empty;
+                    if (!slProjectPaths.TryGetValue(arProjects[i], out sProjectPath))
+                    {
+                        sProjectPath = PWWrapper.GetProjectNamePath2(arProjects[i]);
+                    }
+
+                    dr["ProjectPath"] = sProjectPath;
+                }
+
+                try
+                {
+                    dt.Rows.Add(dr);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(string.Format("Error: {0}\n{1}", ex.Message, ex.StackTrace));
+                }
+            }
+
+            // because I always forget the column names
+            StringBuilder sbColumns = new StringBuilder();
+
+            foreach (DataColumn dc in dt.Columns)
+            {
+                sbColumns.Append(dc.ColumnName + ";");
+            }
+
+            System.Diagnostics.Debug.WriteLine(string.Format("Columns: {0}", sbColumns.ToString()));
+        }
+
+        GC.Collect();
+
+        return dt;
+    }
+
 
     // SearchForDocumentsReturnFileNamesOriginalNos
 
@@ -17502,6 +17852,20 @@ public static class Extensions
         return false;
     }
 
+    public static bool AddWithCheckNoNullsInKeysOrValues<TKey, TValue>(this SortedList<TKey, TValue> sortedList, TKey key, TValue value)
+    {
+        if (key != null && value != null)
+        {
+            if (!sortedList.ContainsKey(key))
+            {
+                sortedList.Add(key, value);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static bool AddWithCheckNonZero(this SortedList<int, int> sortedList, int key, int value)
     {
         if (key != 0)
@@ -17529,5 +17893,484 @@ public static class Extensions
         }
 
         return false;
+    }
+}
+
+public class Node<T> : IEqualityComparer, IEnumerable<T>, IEnumerable<Node<T>>
+{
+    public Node<T> Parent { get; private set; }
+    public T Value { get; set; }
+    private readonly List<Node<T>> _children = new List<Node<T>>();
+
+    public Node(T value)
+    {
+        Value = value;
+    }
+
+    public Node<T> this[int index]
+    {
+        get
+        {
+            return _children[index];
+        }
+    }
+
+    public Node<T> Add(T value, int index = -1)
+    {
+        var childNode = new Node<T>(value);
+        Add(childNode, index);
+        return childNode;
+    }
+
+    public void Add(Node<T> childNode, int index = -1)
+    {
+        if (index < -1)
+        {
+            throw new ArgumentException("The index can not be lower then -1");
+        }
+        if (index > Children.Count() - 1)
+        {
+            throw new ArgumentException("The index ({0}) can not be higher then index of the last iten. Use the AddChild() method without an index to add at the end".FormatInvariant(index));
+        }
+        if (!childNode.IsRoot)
+        {
+            throw new ArgumentException("The child node with value [{0}] can not be added because it is not a root node.".FormatInvariant(childNode.Value));
+        }
+
+        if (Root == childNode)
+        {
+            throw new ArgumentException("The child node with value [{0}] is the rootnode of the parent.".FormatInvariant(childNode.Value));
+        }
+
+        if (childNode.SelfAndDescendants.Any(n => this == n))
+        {
+            throw new ArgumentException("The childnode with value [{0}] can not be added to itself or its descendants.".FormatInvariant(childNode.Value));
+        }
+        childNode.Parent = this;
+        if (index == -1)
+        {
+            _children.Add(childNode);
+        }
+        else
+        {
+            _children.Insert(index, childNode);
+        }
+    }
+
+    public Node<T> AddFirstChild(T value)
+    {
+        var childNode = new Node<T>(value);
+        AddFirstChild(childNode);
+        return childNode;
+    }
+
+    public void AddFirstChild(Node<T> childNode)
+    {
+        Add(childNode, 0);
+    }
+
+    public Node<T> AddFirstSibling(T value)
+    {
+        var childNode = new Node<T>(value);
+        AddFirstSibling(childNode);
+        return childNode;
+    }
+
+    public void AddFirstSibling(Node<T> childNode)
+    {
+        Parent.AddFirstChild(childNode);
+    }
+    public Node<T> AddLastSibling(T value)
+    {
+        var childNode = new Node<T>(value);
+        AddLastSibling(childNode);
+        return childNode;
+    }
+
+    public void AddLastSibling(Node<T> childNode)
+    {
+        Parent.Add(childNode);
+    }
+
+    public Node<T> AddParent(T value)
+    {
+        var newNode = new Node<T>(value);
+        AddParent(newNode);
+        return newNode;
+    }
+
+    public void AddParent(Node<T> parentNode)
+    {
+        if (!IsRoot)
+        {
+            throw new ArgumentException("This node [{0}] already has a parent".FormatInvariant(Value), "parentNode");
+        }
+        parentNode.Add(this);
+    }
+
+    public IEnumerable<Node<T>> Ancestors
+    {
+        get
+        {
+            if (IsRoot)
+            {
+                return Enumerable.Empty<Node<T>>();
+            }
+            return Parent.ToIEnumarable().Concat(Parent.Ancestors);
+        }
+    }
+
+    public IEnumerable<Node<T>> Descendants
+    {
+        get
+        {
+            return SelfAndDescendants.Skip(1);
+        }
+    }
+
+    public IEnumerable<Node<T>> Children
+    {
+        get
+        {
+            return _children;
+        }
+    }
+
+    public IEnumerable<Node<T>> Siblings
+    {
+        get
+        {
+            return SelfAndSiblings.Where(Other);
+
+        }
+    }
+
+    private bool Other(Node<T> node)
+    {
+        return !ReferenceEquals(node, this);
+    }
+
+    public IEnumerable<Node<T>> SelfAndChildren
+    {
+        get
+        {
+            return this.ToIEnumarable().Concat(Children);
+        }
+    }
+
+    public IEnumerable<Node<T>> SelfAndAncestors
+    {
+        get
+        {
+            return this.ToIEnumarable().Concat(Ancestors);
+        }
+    }
+
+    public IEnumerable<Node<T>> SelfAndDescendants
+    {
+        get
+        {
+            return this.ToIEnumarable().Concat(Children.SelectMany(c => c.SelfAndDescendants));
+        }
+    }
+
+    public IEnumerable<Node<T>> SelfAndSiblings
+    {
+        get
+        {
+            if (IsRoot)
+            {
+                return this.ToIEnumarable();
+            }
+            return Parent.Children;
+
+        }
+    }
+
+    public IEnumerable<Node<T>> All
+    {
+        get
+        {
+            return Root.SelfAndDescendants;
+        }
+    }
+
+
+    public IEnumerable<Node<T>> SameLevel
+    {
+        get
+        {
+            return SelfAndSameLevel.Where(Other);
+
+        }
+    }
+
+    public int Level
+    {
+        get
+        {
+            return Ancestors.Count();
+        }
+    }
+
+    public IEnumerable<Node<T>> SelfAndSameLevel
+    {
+        get
+        {
+            return GetNodesAtLevel(Level);
+        }
+    }
+
+    public IEnumerable<Node<T>> GetNodesAtLevel(int level)
+    {
+        return Root.GetNodesAtLevelInternal(level);
+    }
+
+    private IEnumerable<Node<T>> GetNodesAtLevelInternal(int level)
+    {
+        if (level == Level)
+        {
+            return this.ToIEnumarable();
+        }
+        return Children.SelectMany(c => c.GetNodesAtLevelInternal(level));
+    }
+
+    public Node<T> Root
+    {
+        get
+        {
+            return SelfAndAncestors.Last();
+        }
+    }
+
+    public void Disconnect()
+    {
+        if (IsRoot)
+        {
+            throw new InvalidOperationException("The root node [{0}] can not get disconnected from a parent.".FormatInvariant(Value));
+        }
+        Parent._children.Remove(this);
+        Parent = null;
+    }
+
+    public bool IsRoot
+    {
+        get { return Parent == null; }
+    }
+
+    IEnumerator<T> IEnumerable<T>.GetEnumerator()
+    {
+        return _children.Values().GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _children.GetEnumerator();
+    }
+
+    public IEnumerator<Node<T>> GetEnumerator()
+    {
+        return _children.GetEnumerator();
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
+
+    public static IEnumerable<Node<T>> CreateTree<TId>(IEnumerable<T> values, Func<T, TId> idSelector, Func<T, TId?> parentIdSelector)
+        where TId : struct
+    {
+        var valuesCache = values.ToList();
+        if (!valuesCache.Any())
+            return Enumerable.Empty<Node<T>>();
+        T itemWithIdAndParentIdIsTheSame = valuesCache.FirstOrDefault(v => IsSameId(idSelector(v), parentIdSelector(v)));
+        if (itemWithIdAndParentIdIsTheSame != null) // Hier verwacht je ook een null terug te kunnen komen
+        {
+            throw new ArgumentException("At least one value has the same Id and parentId [{0}]".FormatInvariant(itemWithIdAndParentIdIsTheSame));
+        }
+
+        var nodes = valuesCache.Select(v => new Node<T>(v));
+        return CreateTree(nodes, idSelector, parentIdSelector);
+
+    }
+
+    public static IEnumerable<Node<T>> CreateTree<TId>(IEnumerable<Node<T>> rootNodes, Func<T, TId> idSelector, Func<T, TId?> parentIdSelector)
+        where TId : struct
+
+    {
+        var rootNodesCache = rootNodes.ToList();
+        var duplicates = rootNodesCache.Duplicates(n => n).ToList();
+        if (duplicates.Any())
+        {
+            throw new ArgumentException("One or more values contains {0} duplicate keys. The first duplicate is: [{1}]".FormatInvariant(duplicates.Count, duplicates[0]));
+        }
+
+        foreach (var rootNode in rootNodesCache)
+        {
+            var parentId = parentIdSelector(rootNode.Value);
+            var parent = rootNodesCache.FirstOrDefault(n => IsSameId(idSelector(n.Value), parentId));
+
+            if (parent != null)
+            {
+                parent.Add(rootNode);
+            }
+            else if (parentId != null)
+            {
+
+                throw new ArgumentException("A value has the parent ID [{0}] but no other nodes has this ID".FormatInvariant(parentId.Value));
+            }
+        }
+        var result = rootNodesCache.Where(n => n.IsRoot);
+        return result;
+    }
+
+
+    private static bool IsSameId<TId>(TId id, TId? parentId)
+        where TId : struct
+    {
+        return parentId != null && id.Equals(parentId.Value);
+    }
+
+    #region Equals en ==
+
+    public static bool operator ==(Node<T> value1, Node<T> value2)
+    {
+        if ((object)(value1) == null && (object)value2 == null)
+        {
+            return true;
+        }
+        return ReferenceEquals(value1, value2);
+    }
+
+    public static bool operator !=(Node<T> value1, Node<T> value2)
+    {
+        return !(value1 == value2);
+    }
+
+    public override bool Equals(Object anderePeriode)
+    {
+        var valueThisType = anderePeriode as Node<T>;
+        return this == valueThisType;
+    }
+
+    public bool Equals(Node<T> value)
+    {
+        return this == value;
+    }
+
+    public bool Equals(Node<T> value1, Node<T> value2)
+    {
+        return value1 == value2;
+    }
+
+    bool IEqualityComparer.Equals(object value1, object value2)
+    {
+        var valueThisType1 = value1 as Node<T>;
+        var valueThisType2 = value2 as Node<T>;
+
+        return Equals(valueThisType1, valueThisType2);
+    }
+
+    public int GetHashCode(object obj)
+    {
+        return GetHashCode(obj as Node<T>);
+    }
+
+    public override int GetHashCode()
+    {
+        return GetHashCode(this);
+    }
+
+    public int GetHashCode(Node<T> value)
+    {
+        return base.GetHashCode();
+    }
+
+    #endregion
+}
+
+public static class NodeExtensions
+{
+    public static IEnumerable<T> Values<T>(this IEnumerable<Node<T>> nodes)
+    {
+        return nodes.Select(n => n.Value);
+    }
+}
+
+public static class OtherExtensions
+{
+    public static IEnumerable<TSource> Duplicates<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector)
+    {
+        var grouped = source.GroupBy(selector);
+        var moreThen1 = grouped.Where(i => i.IsMultiple());
+
+        return moreThen1.SelectMany(i => i);
+    }
+
+    public static bool IsMultiple<T>(this IEnumerable<T> source)
+    {
+        var enumerator = source.GetEnumerator();
+        return enumerator.MoveNext() && enumerator.MoveNext();
+    }
+
+    public static IEnumerable<T> ToIEnumarable<T>(this T item)
+    {
+        yield return item;
+    }
+
+    public static string FormatInvariant(this string text, params object[] parameters)
+    {
+        // This is not the "real" implementation, but that would go out of Scope
+        return string.Format(CultureInfo.InvariantCulture, text, parameters);
+    }
+}
+
+public class FolderClass
+{
+    public int Id { get; set; }
+    public int? ParentId { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public string CalculatedPath { get; set; } = string.Empty;
+    public bool PathDetermined { get; set; } = false;
+
+    public static string GetPath(Node<FolderClass> folderNode, bool bUseDescription)
+    {
+        if (folderNode == null)
+            return string.Empty;
+
+        StringBuilder sbPath = new StringBuilder();
+
+        // builds from bottom up
+        foreach (var node in folderNode.Ancestors)
+        {
+            // if (!string.IsNullOrEmpty(node.Value.CalculatedPath))
+            if (node.Value.PathDetermined)
+            {
+                sbPath.Insert(0, $"\\{node.Value.CalculatedPath}");
+                break;
+            }
+            else
+            {
+                if (bUseDescription)
+                    sbPath.Insert(0, $"\\{node.Value.Description}");
+                else
+                    sbPath.Insert(0, $"\\{node.Value.Name}");
+            }
+        }
+
+        if (bUseDescription)
+            sbPath.Append($"\\{folderNode.Value.Description}");
+        else
+            sbPath.Append($"\\{folderNode.Value.Name}");
+
+        string sPathToReturn = sbPath.ToString().StartsWith(@"\\") ? sbPath.ToString().Substring(2) : sbPath.ToString();
+
+        // folderNode.Value.CalculatedPath = sPathToReturn.StartsWith(@"\") ? sPathToReturn.Substring(1) : sPathToReturn;
+        // folderNode.Value.PathDetermined = true;
+
+        return sPathToReturn.StartsWith(@"\") ? sPathToReturn.Substring(1) : sPathToReturn;
+        // return folderNode.Value.CalculatedPath;
     }
 }
