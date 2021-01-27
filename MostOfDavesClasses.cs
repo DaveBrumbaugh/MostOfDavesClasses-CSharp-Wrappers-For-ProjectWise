@@ -8570,6 +8570,20 @@ int lLenghtBuffer            /* i  Buffer length           */
         return slApplications;
     }
 
+    public static SortedList<int, PWWrapper.ProjectWiseApplication> GetApplicationsById()
+    {
+        SortedList<int, ProjectWiseApplication> slApplications = new SortedList<int, ProjectWiseApplication>();
+
+        int iNumApplications = PWWrapper.aaApi_SelectAllApplications();
+
+        for (int i = 0; i < iNumApplications; i++)
+        {
+            int iId = PWWrapper.aaApi_GetApplicationNumericProperty(ApplicationProperty.ID, i);
+            slApplications.AddWithCheck(iId, new ProjectWiseApplication(iId, PWWrapper.aaApi_GetApplicationStringProperty(ApplicationProperty.Name, i)));
+        }
+
+        return slApplications;
+    }
 
     public static SortedList<string, PWWrapper.ProjectWiseUser> GetUsersByName()
     {
@@ -9227,15 +9241,18 @@ int lLenghtBuffer            /* i  Buffer length           */
 
     public static int GetApplicationId(string sApplicationName)
     {
-        int iNumApplications = PWWrapper.aaApi_SelectAllApplications();
-
-        for (int i = 0; i < iNumApplications; i++)
+        if (!string.IsNullOrEmpty(sApplicationName))
         {
-            string sName =
-                PWWrapper.aaApi_GetApplicationStringProperty(ApplicationProperty.Name, i);
+            int iNumApplications = PWWrapper.aaApi_SelectAllApplications();
 
-            if (sApplicationName.ToLower() == sName.ToLower())
-                return PWWrapper.aaApi_GetApplicationId(i);
+            for (int i = 0; i < iNumApplications; i++)
+            {
+                string sName =
+                    PWWrapper.aaApi_GetApplicationStringProperty(ApplicationProperty.Name, i);
+
+                if (sApplicationName.ToLower() == sName.ToLower())
+                    return PWWrapper.aaApi_GetApplicationId(i);
+            }
         }
 
         return 0;
@@ -12913,6 +12930,178 @@ public class PWSearch
             out string[] arAttributeColumnValues
         );
 
+    [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocumentsUltimate")]
+    private extern static int SearchForDocumentsUltimateX64
+    (
+        int iProjectId,
+        bool bIncludeSubVaults,
+        string wcFullTextString,
+        bool bWholePhrase,
+        bool bAnyWord, // otherwise all words
+        bool bSearchAttributes, // otherwise full text at this point
+        string szDocumentNameP,
+        string szFileNameP,
+        string szDocumentDescP,
+        bool bOriginalsOnly,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+        int iAttributesLength,
+        string szEnvironmentsP, // comma delimited environment ids
+        string szStatesP, // comma delimited state ids
+        string szWorkflowsP, // comma delimited workflow ids
+        string szFileUpdatedAfterP, // early date 2009-10-22 01:00:00
+        string szFileUpdatedBeforeP, // late date 2010-10-22 01:00:00
+        string szDocUpdatedAfterP, // early date 2009-10-22 01:00:00 // added 2020-04-02
+        string szDocUpdatedBeforeP, // late date 2010-10-22 01:00:00 // added 2020-04-02
+        string szDocCreatedAfterP, // early date 2009-10-22 01:00:00
+        string szDocCreatedBeforeP, // late date 2010-10-22 01:00:00
+        string szDocCheckedOutAfterP, // early date 2009-10-22 01:00:00
+        string szDocCheckedOutBeforeP, // late date 2010-10-22 01:00:00
+        double dLatitudeMin,
+        double dintitudeMin,
+        double dLatitudeMax,
+        double dintitudeMax,
+        bool bSpatialSecondPass,
+        string szStoragesP, // comma delimited storage ids
+        string szStatusesP, // comma delimited statuses ('CO','CI','I') etc.
+        string szItemTypesP, // comma delimited types (12 flat set, 15 abstract, 0 and 10 are normal, 13 redline).
+        int iFinalStatus, // -1 ignore, 0 not final status, 1 final status
+        string szCreatorIdsP, // comma delimited creator ids
+        string szLastUserIdsP, // comma delimited last user ids
+        string szCheckedOutUserIdsP, // comma delimited checked out user ids
+        string szApplicationIdsP, // comma delimited application ids
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arReturnColumns,
+        int iReturnColumnsSize,
+        string szDelimiterP, // delimiter for additional column values
+        string sQueryName,
+        int iQueryParentProjectId,
+        int iQueryParentId,
+        [Out] out IntPtr  ppProjects,
+        [Out] out IntPtr  ppDocumentIds,
+        [Out] out IntPtr  ppVersionSeqNumbers,
+        [Out] out IntPtr  ppOriginalNumbers,
+        [Out] out IntPtr  ppWorkflowIds,
+        [Out] out IntPtr  ppStateIds,
+        [Out] out IntPtr  ppStorageIds,
+        [Out] out IntPtr  ppCreatorIds,
+        [Out] out IntPtr  ppUpdaterIds,
+        [Out] out IntPtr  ppCheckedOutUserIds,
+        [Out] out IntPtr  ppItemTypes, // normal, set or abstract
+        [Out] out IntPtr  ppApplicationIds,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentGuidStrings,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentDescriptions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arFileUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentCreateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentCheckedOutDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentVersions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentStatuses,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentMimeTypes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arAttribeColumnValues
+    );
+
+    [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocumentsUltimate")]
+    private extern static int SearchForDocumentsUltimate
+    (
+        int iProjectId,
+        bool bIncludeSubVaults,
+        string wcFullTextString,
+        bool bWholePhrase,
+        bool bAnyWord, // otherwise all words
+        bool bSearchAttributes, // otherwise full text at this point
+        string szDocumentNameP,
+        string szFileNameP,
+        string szDocumentDescP,
+        bool bOriginalsOnly,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeNames,
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arAttributeValues,
+        int iAttributesLength,
+        string szEnvironmentsP, // comma delimited environment ids
+        string szStatesP, // comma delimited state ids
+        string szWorkflowsP, // comma delimited workflow ids
+        string szFileUpdatedAfterP, // early date 2009-10-22 01:00:00
+        string szFileUpdatedBeforeP, // late date 2010-10-22 01:00:00
+        string szDocUpdatedAfterP, // early date 2009-10-22 01:00:00 // added 2020-04-02
+        string szDocUpdatedBeforeP, // late date 2010-10-22 01:00:00 // added 2020-04-02
+        string szDocCreatedAfterP, // early date 2009-10-22 01:00:00
+        string szDocCreatedBeforeP, // late date 2010-10-22 01:00:00
+        string szDocCheckedOutAfterP, // early date 2009-10-22 01:00:00
+        string szDocCheckedOutBeforeP, // late date 2010-10-22 01:00:00
+        double dLatitudeMin,
+        double dintitudeMin,
+        double dLatitudeMax,
+        double dintitudeMax,
+        bool bSpatialSecondPass,
+        string szStoragesP, // comma delimited storage ids
+        string szStatusesP, // comma delimited statuses ('CO','CI','I') etc.
+        string szItemTypesP, // comma delimited types (12 flat set, 15 abstract, 0 and 10 are normal, 13 redline).
+        int iFinalStatus, // -1 ignore, 0 not final status, 1 final status
+        string szCreatorIdsP, // comma delimited creator ids
+        string szLastUserIdsP, // comma delimited last user ids
+        string szCheckedOutUserIdsP, // comma delimited checked out user ids
+        string szApplicationIdsP, // comma delimited application ids
+        [In][MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] arReturnColumns,
+        int iReturnColumnsSize,
+        string szDelimiterP, // delimiter for additional column values
+        string sQueryName,
+        int iQueryParentProjectId,
+        int iQueryParentId,
+        [Out] out IntPtr ppProjects,
+        [Out] out IntPtr ppDocumentIds,
+        [Out] out IntPtr ppVersionSeqNumbers,
+        [Out] out IntPtr ppOriginalNumbers,
+        [Out] out IntPtr ppWorkflowIds,
+        [Out] out IntPtr ppStateIds,
+        [Out] out IntPtr ppStorageIds,
+        [Out] out IntPtr ppCreatorIds,
+        [Out] out IntPtr ppUpdaterIds,
+        [Out] out IntPtr ppCheckedOutUserIds,
+        [Out] out IntPtr ppItemTypes, // normal, set or abstract
+        [Out] out IntPtr ppApplicationIds,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentGuidStrings,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileNames,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentDescriptions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arFileUpdateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentCreateDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentCheckedOutDates,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentVersions,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentFileSizes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentStatuses,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arDocumentMimeTypes,
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_BSTR)]
+            out string[] arAttribeColumnValues
+    );
+
     [DllImport("PWSearchWrapperX64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, EntryPoint = "SearchForDocumentsWithStatesAndDatesAndReturnColumns")]
     private extern static int SearchForDocumentsWithStatesAndDatesAndReturnColumnsX64(
         int iProjectId,
@@ -13139,9 +13328,12 @@ public class PWSearch
     {
         ManagedIntArray = new int[iCount];
 
-        Marshal.Copy(pUnmanagedIntArray, ManagedIntArray, 0, iCount);
+        if (pUnmanagedIntArray != IntPtr.Zero)
+        {
+            Marshal.Copy(pUnmanagedIntArray, ManagedIntArray, 0, iCount);
 
-        Marshal.FreeCoTaskMem(pUnmanagedIntArray);
+            Marshal.FreeCoTaskMem(pUnmanagedIntArray);
+        }
     }
 
     public static SortedList<int, string> GetListOfRichProjectsFromProperties(int iParentProjectId, string sClassType, SortedList<string, string> slProps, bool bGetPath)
@@ -15982,6 +16174,395 @@ public class PWSearch
 
         return dt;
     }
+
+    public static DataTable SearchForDocumentsUltimate(int iProjectId, // project id
+        bool bSearchSubFolders, // search subfolders
+        string sFullText, // text string to search for
+        bool bWholePhrase, // search for the whole phrase
+        bool bAnyWords, // search for any words in the string
+        bool bSearchAttributes, // also search in the attributes
+        string sDocumentName, // document name to search for (supports % wildcard)
+        string sFileName, // file name to search for (supports % wildcard)
+        string sDocumentDescription, // description to search for (supports % wildcard)
+        bool bOriginalsOnly, // only originals, no versions
+        SortedList<string, string> slAttributes, // attributes and values to search for
+        double dLatitudeMin,
+        double dLongitudeMin,
+        double dLatitudeMax,
+        double dLongitudeMax,
+        bool bSpatialSecondPass,
+        List<int> listEnvironments,
+        List<int> listStates,
+        List<int> listWorkflows,
+        List<int> listStorages,
+        List<int> listApplications,
+        List<string> listStatuses,
+        List<int> listItemTypes,
+        List<int> listCreators,
+        List<int> listUpdaters,
+        List<int> listCheckedOutUsers,
+        int iFinalStatus,
+        string sFileUpdatedAfter, // early date 2009-10-22 01:00:00
+        string sFileUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sDocUpdatedAfter, // early date 2009-10-22 01:00:00
+        string sDocUpdatedBefore, // late date 2010-10-22 01:00:00
+        string sDocCreatedAfter, // early date 2009-10-22 01:00:00
+        string sDocCreatedBefore, // late date 2010-10-22 01:00:00
+        string sDocCheckedOutAfter, // early date 2009-10-22 01:00:00
+        string sDocCheckedOutBefore, // late date 2010-10-22 01:00:00
+        bool bGetPath,
+        List<string> listColumns, // return attribute columns
+        string sQueryName, // if you want to save the query
+        int iQueryParentProjectId, // if you want to hang it on a project
+        int iParentQueryId // if you want to make a sub-query
+        )
+    {
+        IntPtr ppProjects = IntPtr.Zero;
+        IntPtr ppDocumentIds = IntPtr.Zero;
+        IntPtr ppVersionSeqNumbers = IntPtr.Zero;
+        IntPtr ppVersionOriginalNumbers = IntPtr.Zero;
+
+        IntPtr ppWorkflowIds = IntPtr.Zero;
+        IntPtr ppStateIds = IntPtr.Zero;
+        IntPtr ppStorageIds = IntPtr.Zero;
+
+        IntPtr ppUpdaterIds = IntPtr.Zero;
+        IntPtr ppCreatorIds = IntPtr.Zero;
+        IntPtr ppCheckedOutIds = IntPtr.Zero;
+        IntPtr ppApplicationIds = IntPtr.Zero;
+        IntPtr ppItemTypes = IntPtr.Zero;
+        IntPtr ppFinalStatuses = IntPtr.Zero;
+
+        int iCount = 0;
+
+        string[] arDocumentGuidStrings = null;
+        string[] arDocumentNames = null;
+        string[] arDocumentFileNames = null;
+        string[] arDocumentDescriptions = null;
+        string[] arDocumentUpdateDates = null;
+        string[] arFileUpdateDates = null;
+        string[] arDocumentCreateDates = null;
+        string[] arDocumentCheckedOutDates = null;
+        string[] arVersions = null;
+        string[] arFileSizes = null;
+        string[] arMimeTypes = null;
+        string[] arStatuses = null;
+        string[] arAttributes = null;
+
+        string[] arAttributeNames = new string[slAttributes.Count];
+        string[] arAttributeValues = new string[slAttributes.Count];
+
+        int iIndex = 0;
+
+        foreach (KeyValuePair<string, string> kvp in slAttributes)
+        {
+            arAttributeNames[iIndex] = kvp.Key;
+            arAttributeValues[iIndex] = kvp.Value;
+            iIndex++;
+        }
+
+        string sStates = string.Join(",", listStates);
+        string sWorkflows = string.Join(",", listWorkflows);
+        string sStorages = string.Join(",", listStorages);
+        string sStatuses = string.Join(",", listStatuses);
+        string sItemTypes = string.Join(",", listItemTypes);
+        string sCreators = string.Join(",", listCreators);
+        string sUpdaters = string.Join(",", listUpdaters);
+        string sCheckerOuters = string.Join(",", listCheckedOutUsers);
+        string sApplications = string.Join(",", listApplications);
+        string sEnvironments = string.Join(",", listEnvironments);
+
+        System.Diagnostics.Debug.WriteLine("Starting query...");
+
+        string sDelimiter = "^";
+
+        try
+        {
+            if (Is64Bit())
+                iCount = SearchForDocumentsUltimateX64(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
+                    bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly,
+                    arAttributeNames, arAttributeValues, slAttributes.Count,
+                    sEnvironments,
+                    sStates,
+                    sWorkflows,
+                    sFileUpdatedAfter,
+                    sFileUpdatedBefore,
+                    sDocUpdatedAfter,
+                    sDocUpdatedBefore,
+                    sDocCreatedAfter,
+                    sDocCreatedBefore,
+                    sDocCheckedOutAfter,
+                    sDocCheckedOutBefore,
+                    dLatitudeMin, dLongitudeMin, dLatitudeMax, dLongitudeMax, bSpatialSecondPass,
+                    sStorages,
+                    sStatuses,
+                    sItemTypes,
+                    iFinalStatus,
+                    sCreators,
+                    sUpdaters,
+                    sCheckerOuters,
+                    sApplications,
+                    listColumns.ToArray(),
+                    listColumns.Count,
+                    sDelimiter,
+                    sQueryName,
+                    iQueryParentProjectId,
+                    iParentQueryId,
+                    out ppProjects,
+                    out ppDocumentIds,
+                    out ppVersionSeqNumbers,
+                    out ppVersionOriginalNumbers,
+                    out ppWorkflowIds,
+                    out ppStateIds,
+                    out ppStorageIds,
+                    out ppCreatorIds,
+                    out ppUpdaterIds,
+                    out ppCheckedOutIds,
+                    out ppItemTypes,
+                    out ppApplicationIds,
+                    out arDocumentGuidStrings,
+                    out arDocumentNames,
+                    out arDocumentFileNames,
+                    out arDocumentDescriptions,
+                    out arDocumentUpdateDates,
+                    out arFileUpdateDates,
+                    out arDocumentCreateDates,
+                    out arDocumentCheckedOutDates,
+                    out arVersions,
+                    out arFileSizes,
+                    out arStatuses,
+                    out arMimeTypes,
+                    out arAttributes);
+            else
+                iCount = SearchForDocumentsUltimate(iProjectId, bSearchSubFolders, sFullText, bWholePhrase,
+                    bAnyWords, bSearchAttributes, sDocumentName, sFileName, sDocumentDescription, bOriginalsOnly,
+                    arAttributeNames, arAttributeValues, slAttributes.Count,
+                    sEnvironments,
+                    sStates,
+                    sWorkflows,
+                    sFileUpdatedAfter,
+                    sFileUpdatedBefore,
+                    sDocUpdatedAfter,
+                    sDocUpdatedBefore,
+                    sDocCreatedAfter,
+                    sDocCreatedBefore,
+                    sDocCheckedOutAfter,
+                    sDocCheckedOutBefore,
+                    dLatitudeMin, dLongitudeMin, dLatitudeMax, dLongitudeMax, bSpatialSecondPass,
+                    sStorages,
+                    sStatuses,
+                    sItemTypes,
+                    iFinalStatus,
+                    sCreators,
+                    sUpdaters,
+                    sCheckerOuters,
+                    sApplications,
+                    listColumns.ToArray(),
+                    listColumns.Count,
+                    sDelimiter,
+                    sQueryName,
+                    iQueryParentProjectId,
+                    iParentQueryId,
+                    out ppProjects,
+                    out ppDocumentIds,
+                    out ppVersionSeqNumbers,
+                    out ppVersionOriginalNumbers,
+                    out ppWorkflowIds,
+                    out ppStateIds,
+                    out ppStorageIds,
+                    out ppCreatorIds,
+                    out ppUpdaterIds,
+                    out ppCheckedOutIds,
+                    out ppItemTypes,
+                    out ppApplicationIds,
+                    out arDocumentGuidStrings,
+                    out arDocumentNames,
+                    out arDocumentFileNames,
+                    out arDocumentDescriptions,
+                    out arDocumentUpdateDates,
+                    out arFileUpdateDates,
+                    out arDocumentCreateDates,
+                    out arDocumentCheckedOutDates,
+                    out arVersions,
+                    out arFileSizes,
+                    out arStatuses,
+                    out arMimeTypes,
+                    out arAttributes);
+        }
+        catch (Exception ex)
+        {
+            BPSUtilities.WriteLog("Error: {0}\n{1}", ex.Message, ex.StackTrace);
+        }
+
+        System.Diagnostics.Debug.WriteLine(string.Format("Returned {0} matches", iCount));
+
+        DataTable dt = new DataTable("Documents");
+
+        dt.Columns.Add("DocumentGUID", Type.GetType("System.String"));  // 0
+        dt.Columns.Add("DocumentName", Type.GetType("System.String"));  // 1
+        dt.Columns.Add("DocumentFileName", Type.GetType("System.String")); // 2
+        dt.Columns.Add("DocumentDescription", Type.GetType("System.String")); // 3
+        dt.Columns.Add("FileUpdateDate", Type.GetType("System.String")); // 4
+        dt.Columns.Add("DocumentUpdateDate", Type.GetType("System.String")); // 5
+        dt.Columns.Add("ProjectId", Type.GetType("System.Int32")); // 6
+        dt.Columns.Add("DocumentId", Type.GetType("System.Int32")); // 7
+        dt.Columns.Add("DocumentVersion", Type.GetType("System.String")); // 8
+        dt.Columns.Add("DocumentVersionSequence", Type.GetType("System.Int32")); // 9
+        dt.Columns.Add("DocumentOriginalNo", Type.GetType("System.Int32")); // 10
+        dt.Columns.Add("DocumentWorkflowId", Type.GetType("System.Int32")); // 11
+        dt.Columns.Add("DocumentStateId", Type.GetType("System.Int32")); // 12
+        dt.Columns.Add("DocumentStorageId", Type.GetType("System.Int32")); // 13
+        dt.Columns.Add("DocumentCreatorId", Type.GetType("System.Int32")); // 14
+        dt.Columns.Add("DocumentUpdaterId", Type.GetType("System.Int32")); // 15
+        dt.Columns.Add("DocumentItemType", Type.GetType("System.Int32"));  // 16
+        dt.Columns.Add("DocumentApplicationId", Type.GetType("System.Int32")); // 17
+        dt.Columns.Add("DocumentCreatedDate", Type.GetType("System.String")); // 18
+        dt.Columns.Add("DocumentFileSize", typeof(UInt64));             // 19
+        dt.Columns.Add("DocumentStatus", Type.GetType("System.String")); // 20
+        dt.Columns.Add("DocumentMimeType", Type.GetType("System.String")); // 21
+        dt.Columns.Add("DocumentCheckOutUserId", Type.GetType("System.Int32")); // 22
+        dt.Columns.Add("DocumentCheckOutDate", Type.GetType("System.String")); // 23
+
+        dt.Columns.Add("ProjectPath", Type.GetType("System.String"));
+
+        foreach (string sColumnName in listColumns)
+        {
+            if (!dt.Columns.Contains(sColumnName))
+                dt.Columns.Add(sColumnName, typeof(string));
+        }
+
+        DataColumn[] pk = new DataColumn[1];
+        pk[0] = dt.Columns["DocumentGUID"];
+        dt.PrimaryKey = pk;
+
+        SortedList<int, string> slProjectPaths = new SortedList<int, string>();
+
+        if (iCount > 0)
+        {
+            int[] arProjects = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppProjects, iCount, out arProjects);
+            int[] arDocumentIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppDocumentIds, iCount, out arDocumentIds);
+            int[] arDocumentVersionSequenceNumbers = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppVersionSeqNumbers, iCount, out arDocumentVersionSequenceNumbers);
+            int[] arWorkflowIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppWorkflowIds, iCount, out arWorkflowIds);
+            int[] arStateIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppStateIds, iCount, out arStateIds);
+            int[] arStorageIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppStorageIds, iCount, out arStorageIds);
+            int[] arVersionOriginalNos = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppVersionOriginalNumbers, iCount, out arVersionOriginalNos);
+            int[] arItemTypes = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppItemTypes, iCount, out arItemTypes);
+            int[] arCreatorIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppCreatorIds, iCount, out arCreatorIds);
+            int[] arUpdaterIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppUpdaterIds, iCount, out arUpdaterIds);
+            int[] arApplicationIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppApplicationIds, iCount, out arApplicationIds);
+            int[] arCheckedOutIds = new int[iCount];
+            MarshalUnmananagedIntArrayToManagedIntArray(ppCheckedOutIds, iCount, out arCheckedOutIds);
+
+            for (int i = 0; i < iCount; i++)
+            {
+                DataRow dr = dt.NewRow();
+
+                dr["ProjectID"] = arProjects[i];
+                dr["DocumentID"] = arDocumentIds[i];
+                dr["DocumentGUID"] = arDocumentGuidStrings[i];
+                dr["DocumentName"] = arDocumentNames[i];
+                dr["DocumentFileName"] = arDocumentFileNames[i];
+                dr["DocumentDescription"] = arDocumentDescriptions[i];
+                dr["DocumentUpdateDate"] = arDocumentUpdateDates[i];
+                dr["DocumentVersion"] = arVersions[i];
+                dr["DocumentVersionSequence"] = arDocumentVersionSequenceNumbers[i];
+                dr["DocumentWorkflowId"] = arWorkflowIds[i];
+                dr["DocumentStateId"] = arStateIds[i];
+                dr["DocumentStorageId"] = arStorageIds[i];
+                if (arMimeTypes != null)
+                    dr["DocumentMimeType"] = arMimeTypes[i];
+                UInt64 uiFileSize = 0;
+                if (arFileSizes != null)
+                    UInt64.TryParse(arFileSizes[i], out uiFileSize);
+                dr["DocumentFileSize"] = uiFileSize;
+
+                dr["FileUpdateDate"] = arFileUpdateDates[i];
+                dr["DocumentOriginalNo"] = arVersionOriginalNos[i];
+                dr["DocumentCreatorId"] = arCreatorIds[i];
+                dr["DocumentUpdaterId"] = arUpdaterIds[i];
+                dr["DocumentItemType"] = arItemTypes[i];
+                dr["DocumentApplicationId"] = arApplicationIds[i];
+                dr["DocumentCreatedDate"] = arDocumentCreateDates[i];
+                dr["DocumentStatus"] = arStatuses[i];
+
+                dr["DocumentCheckOutUserId"] = arCheckedOutIds[i];
+                dr["DocumentCheckOutDate"] = arDocumentCheckedOutDates[i];
+
+                if (bGetPath)
+                {
+                    string sProjectPath = string.Empty;
+                    if (!slProjectPaths.TryGetValue(arProjects[i], out sProjectPath))
+                    {
+                        sProjectPath = PWWrapper.GetProjectNamePath2(arProjects[i]);
+                        slProjectPaths.AddWithCheck(arProjects[i], sProjectPath);
+                    }
+
+                    dr["ProjectPath"] = sProjectPath;
+                }
+
+                if (arAttributes != null)
+                {
+                    if (arAttributes.Length >= iCount)
+                    {
+                        if (!string.IsNullOrEmpty(arAttributes[i]))
+                        {
+                            string[] sAdditionalValues = arAttributes[i].Split(sDelimiter.ToCharArray());
+
+                            if (sAdditionalValues.Length == listColumns.Count)
+                            {
+                                for (int k = 0; k < listColumns.Count; k++)
+                                {
+                                    if (dt.Columns.Contains(listColumns[k]))
+                                    {
+                                        dr[listColumns[k]] = sAdditionalValues[k].Trim();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine(string.Format("Additional values length was {0} while list of columns contained {1} values.",
+                                    sAdditionalValues.Length, listColumns.Count));
+                            }
+                        }
+                    }
+                }
+
+                try
+                {
+                    dt.Rows.Add(dr);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(string.Format("Error: {0}\n{1}", ex.Message, ex.StackTrace));
+                }
+            }
+
+            // because I always forget the column names
+            StringBuilder sbColumns = new StringBuilder();
+
+            foreach (DataColumn dc in dt.Columns)
+            {
+                sbColumns.Append(dc.ColumnName + ";");
+            }
+
+            System.Diagnostics.Debug.WriteLine(string.Format("Columns: {0}", sbColumns.ToString()));
+        }
+
+        GC.Collect();
+
+        return dt;
+    }
 }
 
 public class BPSUtilities
@@ -16037,6 +16618,26 @@ public class BPSUtilities
 
     public static string DecodeAndValidateToken(string sPossiblyEncodedToken)
     {
+#if NETCOREAPP3_1
+        // can't figure out how to redo this in .NET Core yet, basically will return unencoded token without validation
+
+        if (sPossiblyEncodedToken.ToLower().StartsWith("token "))
+            sPossiblyEncodedToken = sPossiblyEncodedToken.Substring("token ".Length);
+
+        string sUnencodedToken = sPossiblyEncodedToken;
+
+        try
+        {
+            sUnencodedToken = Encoding.UTF8.GetString(Convert.FromBase64String(sPossiblyEncodedToken));
+        }
+        catch
+        {
+            sUnencodedToken = sPossiblyEncodedToken;
+        }
+
+        return sUnencodedToken;
+
+#else
         try
         {
             System.IdentityModel.Tokens.SecurityToken token = null;
@@ -16074,8 +16675,10 @@ public class BPSUtilities
         }
 
         return string.Empty;
+
+#endif
     }
-    
+
     public static bool GetEmbeddedResourceFile(string sResourceName, string sTargetFile)
     {
         System.Reflection.Assembly thisExe = System.Reflection.Assembly.GetExecutingAssembly();
@@ -16689,6 +17292,7 @@ public sealed class PWSession : IDisposable
     /// <param name="sDatasourceName"></param>
     /// <param name="sUserName"></param>
     /// <param name="sPassword"></param>
+    /// <param name="bLoginAsAdmin"></param>
     public PWSession(string sDatasourceName, string sUserName, string sPassword, bool bLoginAsAdmin)
     {
         if (string.IsNullOrEmpty(sDatasourceName))
@@ -18073,6 +18677,17 @@ public class SavedSearches
 
 public static class Extensions
 {
+    public static string SafeGet<TKey>(this SortedList<TKey, string> sortedList, TKey key)
+    {
+        if (sortedList.ContainsKey(key))
+        {
+            return sortedList[key];
+        }
+
+        return string.Empty;
+    }
+
+
     public static bool AddWithCheck<TKey, TValue>(this SortedList<TKey, TValue> sortedList, TKey key, TValue value)
     {
         if (!sortedList.ContainsKey(key))
@@ -18126,6 +18741,39 @@ public static class Extensions
 
         return false;
     }
+
+    public static string DumpContents<TKey, TValue>(this SortedList<TKey, TValue> sortedList,
+        string keyFormatString)
+    {
+        StringBuilder sbContents = new StringBuilder();
+
+        foreach (KeyValuePair<TKey, TValue> kvp in sortedList)
+        {
+            if (sbContents.Length == 0)
+                sbContents.Append($"{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
+            else
+                sbContents.Append($"\n{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
+        }
+
+        return sbContents.ToString();
+    }
+
+    public static string DumpContents<TKey, TValue>(this Dictionary<TKey, TValue> dictionary,
+        string keyFormatString)
+    {
+        StringBuilder sbContents = new StringBuilder();
+
+        foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
+        {
+            if (sbContents.Length == 0)
+                sbContents.Append($"{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
+            else
+                sbContents.Append($"\n{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
+        }
+
+        return sbContents.ToString();
+    }
+
 }
 
 public class Node<T> : IEqualityComparer, IEnumerable<T>, IEnumerable<Node<T>>
@@ -18464,7 +19112,7 @@ public class Node<T> : IEqualityComparer, IEnumerable<T>, IEnumerable<Node<T>>
         return parentId != null && id.Equals(parentId.Value);
     }
 
-    #region Equals en ==
+#region Equals en ==
 
     public static bool operator ==(Node<T> value1, Node<T> value2)
     {
@@ -18519,7 +19167,7 @@ public class Node<T> : IEqualityComparer, IEnumerable<T>, IEnumerable<Node<T>>
         return base.GetHashCode();
     }
 
-    #endregion
+#endregion
 }
 
 public static class NodeExtensions
