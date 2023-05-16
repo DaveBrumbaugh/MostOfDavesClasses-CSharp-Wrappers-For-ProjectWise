@@ -398,7 +398,8 @@ public class PWWrapper
         NoSetChild = 0x00000001,
         NoSetParent = 0x00000002,
         MoveAction = 0x00000004,
-        IncludeVersions = 0x00000008
+        IncludeVersions = 0x00000008,
+        ToTrash = 0x00000040
     }
 
     [Flags]
@@ -513,7 +514,8 @@ public class PWWrapper
 
     public enum DocumentCodeDefinitionFlag : uint
     {
-        AllowEmpty = 0x00000002
+        AllowEmpty = 0x00000002,
+        ExcludeFromDocUID = 0x00000004
     }
 
     public enum DocumentCodeSerialType : int
@@ -1396,6 +1398,72 @@ public class PWWrapper
         ref int pResult
     );
 
+    /// <summary>
+    /// Identifiers for the licensing functions
+    /// </summary>
+    public enum LicenseStatus : int
+    {
+        AALICENSE_STATUS_ERROR = -1,    /**< An error occurred in the licensing module. */
+        AALICENSE_STATUS_OK = 101,      /**< Okay to run - product has been in touch with a Select Server recently, or has a checked-out license. */
+        AALICENSE_STATUS_OFFLINE = 102, /**< We are in the 30-day countdown period.  Product runs as a full product, but a message is displayed to the user. */
+        AALICENSE_STATUS_DISABLED = 103,/**< We were activated at one time, but have been in a Offline status for the past 30 days. Product should run in "demo" mode, i.e. 15 minute mode.*/
+        AALICENSE_STATUS_TRIAL = 104,   /**< We have never activated and are within the 30-day evaluation (Trial Mode). */
+        AALICENSE_STATUS_EXPIRED = 105, /**< We are beyond the full-product 30-day trial mode and have never been activated. Product should not run. */
+    }
+
+    /// <summary>
+    /// Record the usage of an application. This API simply indicates whether the usage was recorded with the SELECTServer. The caller must determine whether the application should continue after failure.
+    /// </summary>
+    /// <param name="iProductId">Product ID. Assuming GPR ID</param>
+    /// <param name="sVersionString">Product version string (aa.bb.cc.dd)</param>
+    /// <param name="iLicenseStatus">Should be value from LicenseStatus enum.</param>
+    /// <returns>TRUE if application usage successfully recorded</returns>
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_StartClientLicense(int iProductId, string sVersionString, ref int iLicenseStatus);
+
+    /// <summary>
+    /// Populates AADMSBUFFER_CHKL buffer
+    /// </summary>
+    /// <param name="iProjectId">-1 for all</param>
+    /// <param name="iDocumentId">-1 for all</param>
+    /// <param name="iUserId">-1 for all</param>
+    /// <param name="sCheckoutType">NULL to ignore</param>
+    /// <param name="sNodeName">NULL to ignore</param>
+    /// <param name="sCheckoutTime">NULL to ignore</param>
+    /// <returns></returns>
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_SelectLocationsByProp(int iProjectId, int iDocumentId, int iUserId, string sCheckoutType, string sNodeName, string sCheckoutTime);
+
+    public enum LocationProperty : int
+    {
+        ProjectID = 1,
+        ItemID = 2,
+        StorageID = 3,
+        SetID = 4,
+        UserID = 5,
+        FileName = 6,
+        Node = 7,
+        Time = 8,
+        Type = 9,
+        Directory = 10,
+        DocGuid = 11,
+        FileRevision = 12,
+        ChklGuid = 13,
+        Flags = 14
+    }
+
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_GetLocationStringProperty", CharSet = CharSet.Unicode)]
+    private static extern IntPtr __aaApi_GetLocationStringProperty(LocationProperty PropertyId, int Index);
+
+    public static string aaApi_GetLocationStringProperty(LocationProperty PropertyId, int Index)
+    {
+        return Marshal.PtrToStringUni(__aaApi_GetLocationStringProperty(PropertyId, Index));
+    }
+
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_GetLocationNumericProperty", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_GetLocationNumericProperty(LocationProperty PropertyId, int Index);
+
     //new function wrapped by MDS
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_SelectDatasourceStatistics();
@@ -1874,6 +1942,29 @@ public class PWWrapper
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_ModifyProject2(ref VaultDescriptor vaultDescriptor);
+
+    // BOOL aaApi_GetConnectedProjectAssociationByGUID(LPCGUID pPwProjectGuid, LPGUID pConnectedProjectGuid) 
+    //   Returns the GUID of the CONNECTED Project associated with the specified ProjectWise rich project.
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_GetConnectedProjectAssociationByGUID(Guid guidProjectID, ref Guid pConnectedProjectGuid);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_GetConnectedProjectAssociationByFolder(int iProjectID, ref Guid pConnectedProjectGuid);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_GetConnectedProjectAssociation(int iProjectID, ref Guid pConnectedProjectGuid);
+
+    // BOOL aaApi_SetConnectedProjectAssociation(LONG pwProjectId, LPCGUID pConnectedProjectGuid )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_SetConnectedProjectAssociation(int iProjectID, ref Guid pConnectedProjectGuid);
+
+    // BOOL aaApi_DeleteConnectedProjectAssociation(LONG pwProjectId) // Erases the CONNECTED project association for the specified ProjectWise rich project.
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteConnectedProjectAssociation(int iProjectID);
+
+    // BOOL aaApi_DeleteConnectedProjectAssociationByGUID(LPCGUID pPwProjectGuid) // Erases the CONNECTED project association for the specified ProjectWise rich project.
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteConnectedProjectAssociationByGUID(ref Guid pPwProjectGuid);
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -3478,6 +3569,10 @@ string lpctstrVersion  /* i  Project version to search for     */
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectAllGroups();
+
+    // dww - 2021-02-15 to support updating group name or description
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_ModifyGroup( int lGroupId, string lpcstrName, string lpctstrDesc);
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -6745,6 +6840,13 @@ string lpctstrDesc          /* i  Modified document description */
     public static extern bool aaApi_ExportDocument(int lProjectNo, int lDocumentId,
         string lpctstrWorkdir, StringBuilder lptstrFileName, int lBufferSize);
 
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_ExportDocuments", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_ExportDocuments(
+         ulong guiFlags,
+         long count,
+         [In] AaDocItem[] arrSrcDocs,   
+         string lpctstrWorkdir, StringBuilder lptstrFileName, int lBufferSize);
+
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_CreateFlatSet
@@ -8223,6 +8325,9 @@ int lLenghtBuffer            /* i  Buffer length           */
     }
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_RemoveStateFromWorkflow(int iWorkflowId, int iStateId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectWorkflowStateLinks(int iWorkflowId, int iState);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -8487,6 +8592,35 @@ int lLenghtBuffer            /* i  Buffer length           */
         public string Description { get; set; }
         public string GroupType { get; set; }
         public string SecurityProvider { get; set; }
+
+        // dww - 2021-03-15 - so users can change the group description
+        public bool UpdateDescription(string newDesc)
+        {
+            PWWrapper.aaApi_SelectGroup(this.ID);
+
+            if(!PWWrapper.aaApi_ModifyGroup(this.ID, null, newDesc))
+            {
+                return false;
+            }
+            this.Description = newDesc;
+
+            return true;
+        }
+
+        // dww - so users can rename the group
+        public bool UpdateName(string newName)
+        {
+            PWWrapper.aaApi_SelectGroup(this.ID);
+
+            if (!PWWrapper.aaApi_ModifyGroup(this.ID, newName, null))
+            {
+                return false;
+            }
+                this.Name = newName;
+
+                return true;
+
+        }
 
         public DataTable GetMembers()
         {
@@ -8796,6 +8930,7 @@ int lLenghtBuffer            /* i  Buffer length           */
 
         return false;
     }
+    
 
 
     public static SortedList<string, PWWrapper.ProjectWiseUserList> GetUserListsByName()
@@ -8998,6 +9133,27 @@ int lLenghtBuffer            /* i  Buffer length           */
 
         return listStatesById;
     }
+    public static SortedList<int, string> GetEnvironmentTablesById()
+    {
+        SortedList<int, string> listEnvironmentsById = new SortedList<int, string>();
+
+        int iNumEnvs = PWWrapper.aaApi_SelectAllEnvs(true);
+
+        for (int i = 0; i < iNumEnvs; i++)
+        {
+            int iEnvId = PWWrapper.aaApi_GetEnvId(i);
+            if (!listEnvironmentsById.ContainsKey(iEnvId))
+            {
+                int iTableId = PWWrapper.aaApi_GetEnvNumericProperty(PWWrapper.EnvironmentProperty.TableID, i);
+                int nRetCode = PWWrapper.aaApi_SelectTable(iTableId);
+                listEnvironmentsById.Add(iEnvId, PWWrapper.aaApi_GetTableStringProperty(TableProperty.Name, 0));
+            }
+        }
+
+
+        return listEnvironmentsById;
+    }
+
 
     public static SortedList<int, string> GetEnvironmentsById()
     {
@@ -9159,6 +9315,9 @@ int lLenghtBuffer            /* i  Buffer length           */
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteProjectById(int iProjectId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteProjectById2(int iProjectId,  uint flags);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteProject
@@ -9757,13 +9916,10 @@ int lLenghtBuffer            /* i  Buffer length           */
                 /********  DESIRED VERSION - only need to change this line to update the *********
                  ********  PW verison that will be required by all components of RaDS    
                  ********  this is a minimum version requirement *********/
-                 // first version with 64-bit
                 Version minVersion = new Version("08.11");
-                string[] regKeys = new String[]{
-                    "SOFTWARE\\Bentley\\ProjectWise Explorer",
-                    // added for integration server only
-                    "SOFTWARE\\Bentley\\ProjectWise"
-                };
+                string[] regKeys = new String[]{"SOFTWARE\\Bentley\\ProjectWise Explorer",
+                        "SOFTWARE\\Bentley\\ProjectWise",
+                        "SOFTWARE\\Bentley\\ProjectWise\\ProjectWise Explorer" };
 
                 foreach (string regKeyPath in regKeys)
                 {
@@ -9778,32 +9934,53 @@ int lLenghtBuffer            /* i  Buffer length           */
                             for (int i = 0; i < versions.Length; i++)
                             {
                                 Microsoft.Win32.RegistryKey versionSubKey = regKey.OpenSubKey(versions[i]);
-
                                 if (versionSubKey == null)
                                     continue;
 
                                 //string sVersion = (string)versionSubKey.GetValue("Version");
                                 //if (sVersion == null)
                                 //    continue;
-                                Version version = new Version(versions[i]);
-
-                                if (version >= minVersion)
+                                try
                                 {
-                                    installDirectory = (string)versionSubKey.GetValue("PathName");
+                                    Version version = new Version(versions[i]);
 
-                                    if (string.IsNullOrEmpty(installDirectory))
+                                    if (version >= minVersion)
                                     {
-                                        installDirectory = (string)versionSubKey.GetValue("Path");
-                                    }
+                                        installDirectory = (string)versionSubKey.GetValue("PathName");
 
-                                    minVersion = version;
+                                        if (string.IsNullOrEmpty(installDirectory))
+                                            installDirectory = (string)versionSubKey.GetValue("Path");
+
+                                        minVersion = version;
+                                    }
+                                }
+                                catch
+                                {
+
                                 }
                             }
+
+                            if (!string.IsNullOrEmpty(installDirectory))
+                            {
+                                break;
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(installDirectory))
+                        {
+                            installDirectory = (string)regKey.GetValue("PathName");
+
+                            if (string.IsNullOrEmpty(installDirectory))
+                            {
+                                installDirectory = (string)regKey.GetValue("Path");
+                            }
+
                             if (!string.IsNullOrEmpty(installDirectory))
                                 break;
                         }
-                    }
+                    } // regkey != null
                 }
+
                 if (string.IsNullOrEmpty(installDirectory))
                     throw new ApplicationException("Registry search could not find installation directory for a ProjectWise version matching minimum required version '" +
                         minVersion + "'.\nMake sure a ProjectWise version matching the above version is installed on this system.");
@@ -9818,7 +9995,9 @@ int lLenghtBuffer            /* i  Buffer length           */
                 string[] regKeys = new String[]{"SOFTWARE\\Wow6432Node\\Bentley\\ProjectWise Explorer",
                                                     "SOFTWARE\\Wow6432Node\\Bentley\\ProjectWise Administrator",
                                                     "SOFTWARE\\Bentley\\ProjectWise Explorer",
-                                                   "SOFTWARE\\Bentley\\ProjectWise Administrator"};
+                                                   "SOFTWARE\\Bentley\\ProjectWise Administrator",
+                                                    "SOFTWARE\\Bentley\\ProjectWise\\ProjectWise Explorer",
+                                                    "SOFTWARE\\Bentley\\ProjectWise"};
 
                 foreach (string regKeyPath in regKeys)
                 {
@@ -9839,20 +10018,46 @@ int lLenghtBuffer            /* i  Buffer length           */
                                 string sVersion = (string)versionSubKey.GetValue("Version");
                                 if (sVersion == null)
                                     continue;
-                                Version version = new Version(sVersion);
 
-                                if (version >= minVersion)
+                                try
                                 {
-                                    installDirectory = (string)versionSubKey.GetValue("PathName");
-                                    minVersion = version;
+                                    Version version = new Version(versions[i]);
+
+                                    if (version >= minVersion)
+                                    {
+                                        installDirectory = (string)versionSubKey.GetValue("PathName");
+
+                                        if (string.IsNullOrEmpty(installDirectory))
+                                            installDirectory = (string)versionSubKey.GetValue("Path");
+
+                                        minVersion = version;
+                                    }
+                                }
+                                catch
+                                {
+
                                 }
                             }
                             if (installDirectory != null)
                                 break;
                         }
-                    }
+
+                        // v 23.00.00.x
+                        if (string.IsNullOrEmpty(installDirectory))
+                        {
+                            installDirectory = (string)regKey.GetValue("PathName");
+
+                            if (string.IsNullOrEmpty(installDirectory))
+                            {
+                                installDirectory = (string)regKey.GetValue("Path");
+                            }
+
+                            if (!string.IsNullOrEmpty(installDirectory))
+                                break;
+                        }
+                    } // regkey != null
                 }
-                if (installDirectory == null)
+                if (string.IsNullOrEmpty(installDirectory))
                     throw new ApplicationException("Registry search could not find installation directory for a ProjectWise version matching minimum required version '" +
                         minVersion + "'.\nMake sure a ProjectWise version matching the above version is installed on this system.");
             }
@@ -9862,6 +10067,7 @@ int lLenghtBuffer            /* i  Buffer length           */
             // EventLog log = new EventLog("Application", ".", "ProjectWise .NET API Wrapper");
             // log.WriteEntry(ex.Message, EventLogEntryType.Error);
             System.Diagnostics.Debug.WriteLine(ex.Message);
+            // Console.WriteLine($"{ex.Message}\n{ex.StackTrace}");
         }
 
         return installDirectory;
@@ -10279,6 +10485,20 @@ int lLenghtBuffer            /* i  Buffer length           */
 
     [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr workspace_selectConfBlockVars(int iConfigBlockId);
+ 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WorkspaceVarValueInfo
+    {
+        public int opType;
+        public int valueType;
+        public int valueInt;
+        public string valueString ;
+        public double valueDouble;
+     };
+
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_getDataBufferBufferProperty(IntPtr hWorkspaceBuffer, WorkspaceDmsBufferVariablesProperty propertyId, int iIndex);
 
     [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
     public static extern int workspace_getItemCountInDataBuffer(IntPtr hWorkspaceBuffer);
@@ -10674,6 +10894,19 @@ int lLenghtBuffer            /* i  Buffer length           */
         return listOfColumns;
     }
 
+    public static SortedList<string, int> GetColumnIdsKeyedByNameFromTableInList(int iTableId)
+    {
+        SortedList<string, int> htAttrVals = new SortedList<string, int>(StringComparer.CurrentCultureIgnoreCase);
+
+        int iAttrDefCount = PWWrapper.aaApi_SelectColumnsByTable(iTableId);
+
+        for (int i = 0; i < iAttrDefCount; i++)
+        {
+            htAttrVals.AddWithCheckNoNullsInKeysOrValues(PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, i), PWWrapper.aaApi_GetColumnNumericProperty(ColumnProperty.ColumnID, i));
+        }
+
+        return htAttrVals;
+    }
 
     public static Hashtable GetColumnIdsKeyedByNameFromTable(int iTableId)
     {
@@ -10707,7 +10940,8 @@ int lLenghtBuffer            /* i  Buffer length           */
             string sColumnName = PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, i);
 
             if (!htAttrVals.ContainsKey(iColId))
-                htAttrVals.Add(iColId, sColumnName.ToLower());
+                // htAttrVals.Add(iColId, sColumnName.ToLower());
+                htAttrVals.Add(iColId, sColumnName);
         }
 
         return htAttrVals;
@@ -12212,6 +12446,7 @@ public class PWSearch
         string sViewName
     );
 
+#if TO_BE_REMOVED_OR_REPLACED_MWBSI
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     public static extern int CreateSearchFolder
     (
@@ -12227,6 +12462,7 @@ public class PWSearch
         int lParentProjectId,
         int lParentQueryId
     );
+#endif
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_SQueryDelete(int iQueryId);
@@ -18591,6 +18827,7 @@ public class XMLSpreadsheetDatasetTools
 
         return ds;
     }
+
 }
 
 public class SavedSearches
@@ -18677,6 +18914,26 @@ public class SavedSearches
 
 public static class Extensions
 {
+    public static Dictionary<int, string> GetDictionaryIntString(this DataTable dt, int iKeyColumnIndex, int iValueColumnIndex)
+    {
+        return dt.AsEnumerable()
+          .ToDictionary(row => row.Field<int>(iKeyColumnIndex),
+                                    row => row.Field<string>(iValueColumnIndex));
+    }
+
+    public static Dictionary<string, string> GetDictionaryStringString(this DataTable dt, int iKeyColumnIndex, int iValueColumnIndex)
+    {
+        return dt.AsEnumerable()
+          .ToDictionary(row => row.Field<string>(iKeyColumnIndex),
+                                    row => row.Field<string>(iValueColumnIndex));
+    }
+    public static Dictionary<string, int> GetDictionaryStringInt(this DataTable dt, int iKeyColumnIndex, int iValueColumnIndex)
+    {
+        return dt.AsEnumerable()
+          .ToDictionary(row => row.Field<string>(iKeyColumnIndex),
+                                    row => row.Field<int>(iValueColumnIndex));
+    }
+
     public static string SafeGet<TKey>(this SortedList<TKey, string> sortedList, TKey key)
     {
         if (sortedList.ContainsKey(key))
@@ -18749,10 +19006,24 @@ public static class Extensions
 
         foreach (KeyValuePair<TKey, TValue> kvp in sortedList)
         {
-            if (sbContents.Length == 0)
-                sbContents.Append($"{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
-            else
-                sbContents.Append($"\n{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
+            try
+            {
+                string sKey = string.Empty, sValue = string.Empty;
+
+                if (kvp.Key != null)
+                    sKey = kvp.Key.ToString();
+
+                if (kvp.Value != null)
+                    sValue = kvp.Value.ToString();
+
+                string sAppend = string.Format(keyFormatString, sKey, sValue);
+
+                sbContents.AppendLine(sAppend);
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         return sbContents.ToString();
@@ -18765,10 +19036,24 @@ public static class Extensions
 
         foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
         {
-            if (sbContents.Length == 0)
-                sbContents.Append($"{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
-            else
-                sbContents.Append($"\n{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
+            try
+            {
+                string sKey = string.Empty, sValue = string.Empty;
+
+                if (kvp.Key != null)
+                    sKey = kvp.Key.ToString();
+
+                if (kvp.Value != null)
+                    sValue = kvp.Value.ToString();
+
+                string sAppend = string.Format(keyFormatString, sKey, sValue);
+
+                sbContents.AppendLine(sAppend);
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         return sbContents.ToString();
