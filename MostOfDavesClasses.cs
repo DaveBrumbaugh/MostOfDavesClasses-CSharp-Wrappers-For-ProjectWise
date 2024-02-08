@@ -13,6 +13,8 @@ using System.Xml;
 //using System.Net.Http.Headers;
 using System.Linq;
 using System.Globalization;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text.RegularExpressions;
 
 public class PWWrapper
 {
@@ -398,8 +400,7 @@ public class PWWrapper
         NoSetChild = 0x00000001,
         NoSetParent = 0x00000002,
         MoveAction = 0x00000004,
-        IncludeVersions = 0x00000008,
-        ToTrash = 0x00000040
+        IncludeVersions = 0x00000008
     }
 
     [Flags]
@@ -433,6 +434,22 @@ public class PWWrapper
         None = 0x00000000,
         CopyAttrs = 0x00000001,
         KeepRelations = 0x00000002
+    }
+
+    [Flags]
+    public enum DocumentExecutionFlags : uint
+    {
+        AAEXECF_ONLY_DEFAULT =  0x00000001,
+        AAEXECF_SHOW_SELECTION = 0x00000002, 
+        AAEXECF_CHECK_OUT = 0x00000004,
+        AAEXECF_SKIP_NOT_FOUND = 0x00000008,
+        AAEXECF_ADD_TO_MRU = 0x00000010,
+        AAEXECF_IGNORE_URL = 0x00000020,
+        AAEXECF_REDLINE_IF_NEEDED = 0x00000040,
+        AAEXECF_NO_SET = 0x00000080,
+        AAEXECF_NEW_PROCESS = 0x00000100,
+        AAEXECF_CLONE_CURRENT_PROCESS = 0x00000200,
+        AAEXECF_IGNORE_WORKSPACE_PARAMS = 0x00000400
     }
 
     [Flags]
@@ -1399,30 +1416,6 @@ public class PWWrapper
     );
 
     /// <summary>
-    /// Identifiers for the licensing functions
-    /// </summary>
-    public enum LicenseStatus : int
-    {
-        AALICENSE_STATUS_ERROR = -1,    /**< An error occurred in the licensing module. */
-        AALICENSE_STATUS_OK = 101,      /**< Okay to run - product has been in touch with a Select Server recently, or has a checked-out license. */
-        AALICENSE_STATUS_OFFLINE = 102, /**< We are in the 30-day countdown period.  Product runs as a full product, but a message is displayed to the user. */
-        AALICENSE_STATUS_DISABLED = 103,/**< We were activated at one time, but have been in a Offline status for the past 30 days. Product should run in "demo" mode, i.e. 15 minute mode.*/
-        AALICENSE_STATUS_TRIAL = 104,   /**< We have never activated and are within the 30-day evaluation (Trial Mode). */
-        AALICENSE_STATUS_EXPIRED = 105, /**< We are beyond the full-product 30-day trial mode and have never been activated. Product should not run. */
-    }
-
-    /// <summary>
-    /// Record the usage of an application. This API simply indicates whether the usage was recorded with the SELECTServer. The caller must determine whether the application should continue after failure.
-    /// </summary>
-    /// <param name="iProductId">Product ID. Assuming GPR ID</param>
-    /// <param name="sVersionString">Product version string (aa.bb.cc.dd)</param>
-    /// <param name="iLicenseStatus">Should be value from LicenseStatus enum.</param>
-    /// <returns>TRUE if application usage successfully recorded</returns>
-
-    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_StartClientLicense(int iProductId, string sVersionString, ref int iLicenseStatus);
-
-    /// <summary>
     /// Populates AADMSBUFFER_CHKL buffer
     /// </summary>
     /// <param name="iProjectId">-1 for all</param>
@@ -1473,6 +1466,19 @@ public class PWWrapper
 (
         string sFileName
 );
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_ExecuteDocumentAction(ref Guid pAction,
+      uint ulExecuteFlags,
+      int lDocumentCount,
+      [In]AaDocItem[] pDocuments,  /* i  Array of target documents   */
+      uint ulOperationFlags,
+      string strStatusText,
+      string strShellVerb,
+      string strWorkingDir,
+      int lAuditTrailAction
+     );
+
 
     [DllImport("DGNPlatformSCUtils.dll", CharSet = CharSet.Unicode)]
     private static extern bool GetDgnFileType(string sFileName, ref int iFileType, ref int iMajorVersion, ref int iMinorVersion);
@@ -1853,6 +1859,29 @@ public class PWWrapper
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_GetMainDocumentList();
 
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DocListIsNavigatorEnabled(IntPtr hWndDocList);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_DocListNavigatorGetCount(IntPtr hWndDocList);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_DocListNavigatorGetCurrentPos(IntPtr hWndDocList);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DocListNavigatorAddItem(IntPtr hWndDocList,
+        IntPtr hMoniker,
+        IntPtr pDscItem,
+        string pDisplayName);
+ 
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_DocListNavigatorMoveForward(IntPtr hWndDocList, bool bAutoSelect, int iMoveNumber, IntPtr ppDisplayName);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_DocListNavigatorMoveBack(IntPtr hWndDocList, bool bAutoSelect, int iMoveNumber, IntPtr ppDisplayName);
+
+
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_GetDocListMoniker(IntPtr docListP);
 
@@ -1867,6 +1896,12 @@ public class PWWrapper
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DocListSelectDocument(IntPtr hWndList, int iProjectId, int iDocumentId, int iAttrId);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_DocListFindItem(IntPtr hWndList, int iStartIndex, int iProjectId, int iDocumentId);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DocListDeleteItem(IntPtr hWndList, int iItemIndex);
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DocListSetProject(IntPtr hWndList, int iProjectId);
@@ -1938,6 +1973,21 @@ public class PWWrapper
     //public static unsafe extern bool aaApi_CreateEnvAttr(int lTableId, _AAEALINKAGE* lpLinkage, ref int lplAttrRecId);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnv
+    (
+        ref int lplEnvironmentId,
+        int lType,
+        string lpctstrTableName,
+        string lpctstrTableDesc,
+        string lpctstrName,
+        string lpctstrDesc,
+        int lFlags,
+        int lAttrRecId
+    );
+
+
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_StrToNumber(string lpctstrNumber);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -1965,6 +2015,7 @@ public class PWWrapper
     // BOOL aaApi_DeleteConnectedProjectAssociationByGUID(LPCGUID pPwProjectGuid) // Erases the CONNECTED project association for the specified ProjectWise rich project.
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteConnectedProjectAssociationByGUID(ref Guid pPwProjectGuid);
+
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -2432,6 +2483,29 @@ int lNameSize      /* i  lptstrName size in characters      */
    StringBuilder lptstrFileName,    /* o  File name with full path     */
    int lBufferSize        /* i  Buffer size for file name    */
 );
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode, EntryPoint = "aaApi_FetchDocumentFromServerExt2")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool aaApi_FetchDocumentFromServerExt2(FetchDocumentFlags flags, int projectId, int documentId, int setId, string workdir, string comments, 
+        StringBuilder filename, int filenameSize, /* AAHCHKLSET * */ IntPtr checkoutLocation);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_PushDocumentToServer(DocumentPushToServerFlags uiFlags, int iProjectID, int iDocumentID, IntPtr Comment);
+
+    [Flags]
+    public enum DocumentPushToServerFlags : uint
+    {
+        AADMS_DOCPUSH_LEAVECOPY = 0x00000001, // Specifies to check in document and leave a copy on a local machine.
+        AADMS_DOCPUSH_UPDATE_SERVER = 0x00000002, // Specifies to update document's server copy. 
+        AADMS_DOCPUSH_DELETE_FILES = 0x00000004, // Specifies to check in document without leaving a local copy.
+        AADMS_DOCPUSH_IMPORT = 0x00000008, // Import; just for exported files.
+        AADMS_DOCPUSH_ALL_MEMBERS = 0x00001000, // Specifies to execute an operation for all set members no matter if they were checked out as set members or not. 
+        AADMS_DOCPUSH_CHECK_IF_USED_EXTERNALLY = 0x00002000, // Check if files are not open in external processes. 
+                                                             // Deprecated AADMS_DOCPUSH_TREAT_AS_UPTODATE         = 0x00008000L, // Allow to treat a local file as up-to-date regardless the db info (for shared documents). 
+                                                             // Deprecated AADMS_DOCPUSH_ALLOW_OVERLAPS            = 0x00010000L, // Allow to check-in with overlaps(for shared documents). 
+        AADMS_DOCPUSH_MASTER_AS_SET = 0x10000000, // For logical sets.
+        AADMS_DOCPUSH_UNMODIFIED = 0x00000010, // The file is not modified.
+    }
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_GUIDPurgeDocumentCopy(ref Guid guid, int iUserID);
@@ -3569,10 +3643,6 @@ string lpctstrVersion  /* i  Project version to search for     */
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectAllGroups();
-
-    // dww - 2021-02-15 to support updating group name or description
-    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_ModifyGroup( int lGroupId, string lpcstrName, string lpctstrDesc);
 
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
@@ -6840,13 +6910,6 @@ string lpctstrDesc          /* i  Modified document description */
     public static extern bool aaApi_ExportDocument(int lProjectNo, int lDocumentId,
         string lpctstrWorkdir, StringBuilder lptstrFileName, int lBufferSize);
 
-    [DllImport("dmscli.dll", EntryPoint = "aaApi_ExportDocuments", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_ExportDocuments(
-         ulong guiFlags,
-         long count,
-         [In] AaDocItem[] arrSrcDocs,   
-         string lpctstrWorkdir, StringBuilder lptstrFileName, int lBufferSize);
-
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_CreateFlatSet
@@ -8132,6 +8195,9 @@ int lObjectId2To       /* i  Target access identifier 2        */
     public static extern int aaApi_AttributeSheetModifyDocument(int lProjectId, int lDocumentId, int lAttributeId);
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
+    public static extern int aaApi_AttributeSheetAddAttributeRecord(int lProjectId, int lDocumentId);
+
+    [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_EnableMenuCommand(int iMenuType /* 0 for all */,
         MenuCommandIds menuCmdId, bool bEnable);
 
@@ -8323,9 +8389,6 @@ int lLenghtBuffer            /* i  Buffer length           */
         PreviousState = 3,
         NextState = 4
     }
-
-    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_RemoveStateFromWorkflow(int iWorkflowId, int iStateId);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectWorkflowStateLinks(int iWorkflowId, int iState);
@@ -8593,35 +8656,6 @@ int lLenghtBuffer            /* i  Buffer length           */
         public string GroupType { get; set; }
         public string SecurityProvider { get; set; }
 
-        // dww - 2021-03-15 - so users can change the group description
-        public bool UpdateDescription(string newDesc)
-        {
-            PWWrapper.aaApi_SelectGroup(this.ID);
-
-            if(!PWWrapper.aaApi_ModifyGroup(this.ID, null, newDesc))
-            {
-                return false;
-            }
-            this.Description = newDesc;
-
-            return true;
-        }
-
-        // dww - so users can rename the group
-        public bool UpdateName(string newName)
-        {
-            PWWrapper.aaApi_SelectGroup(this.ID);
-
-            if (!PWWrapper.aaApi_ModifyGroup(this.ID, newName, null))
-            {
-                return false;
-            }
-                this.Name = newName;
-
-                return true;
-
-        }
-
         public DataTable GetMembers()
         {
             DataTable dt = new DataTable();
@@ -8872,6 +8906,22 @@ int lLenghtBuffer            /* i  Buffer length           */
         return false;
     }
 
+    public static bool IsUserIdInGroup(string sGroup, int iUserId)
+    {
+        int iNumGroups = PWWrapper.aaApi_SelectGroupsByUser(iUserId);
+
+        for (int i = 0; i < iNumGroups; i++)
+        {
+            if (sGroup.ToLower() == PWWrapper.aaApi_GetGroupStringProperty(GroupProperty.Name, i).ToLower())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     private static bool IsUserIdInUserListId(int iUserListID, int iUserId, ref SortedList<int, int> slUserLists)
     {
         // if already checked
@@ -8930,7 +8980,6 @@ int lLenghtBuffer            /* i  Buffer length           */
 
         return false;
     }
-    
 
 
     public static SortedList<string, PWWrapper.ProjectWiseUserList> GetUserListsByName()
@@ -9133,27 +9182,6 @@ int lLenghtBuffer            /* i  Buffer length           */
 
         return listStatesById;
     }
-    public static SortedList<int, string> GetEnvironmentTablesById()
-    {
-        SortedList<int, string> listEnvironmentsById = new SortedList<int, string>();
-
-        int iNumEnvs = PWWrapper.aaApi_SelectAllEnvs(true);
-
-        for (int i = 0; i < iNumEnvs; i++)
-        {
-            int iEnvId = PWWrapper.aaApi_GetEnvId(i);
-            if (!listEnvironmentsById.ContainsKey(iEnvId))
-            {
-                int iTableId = PWWrapper.aaApi_GetEnvNumericProperty(PWWrapper.EnvironmentProperty.TableID, i);
-                int nRetCode = PWWrapper.aaApi_SelectTable(iTableId);
-                listEnvironmentsById.Add(iEnvId, PWWrapper.aaApi_GetTableStringProperty(TableProperty.Name, 0));
-            }
-        }
-
-
-        return listEnvironmentsById;
-    }
-
 
     public static SortedList<int, string> GetEnvironmentsById()
     {
@@ -9286,6 +9314,44 @@ int lLenghtBuffer            /* i  Buffer length           */
         return htWfStates;
     }
 
+    public static SortedList<string, int> GetWorkflowStatesList(string sWorkflowName)
+    {
+        SortedList<string, int> slWorkflowStates = new SortedList<string, int>(StringComparer.CurrentCultureIgnoreCase);
+
+        if (!string.IsNullOrEmpty(sWorkflowName))
+        {
+            int iWfId = GetWorkflowId(sWorkflowName);
+
+            if (iWfId > 0)
+            {
+                int iNumStates = PWWrapper.aaApi_SelectStatesByWorkflow(iWfId);
+
+                for (int i = 0; i < iNumStates; i++)
+                {
+                    string sStateName = PWWrapper.aaApi_GetStateStringProperty(StateProperty.Name, i);
+                    int iStateId = PWWrapper.aaApi_GetStateId(i);
+
+                    slWorkflowStates.AddWithCheck(sStateName, iStateId);
+                }
+            }
+        }
+        else
+        {
+            int iNumStates = PWWrapper.aaApi_SelectAllStates();
+
+            for (int i = 0; i < iNumStates; i++)
+            {
+                string sStateName = PWWrapper.aaApi_GetStateStringProperty(StateProperty.Name, i);
+                int iStateId = PWWrapper.aaApi_GetStateId(i);
+
+                slWorkflowStates.AddWithCheck(sStateName, iStateId);
+            }
+        }
+
+        return slWorkflowStates;
+    }
+
+
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_OdbcDateTimeStringToDbDateTimeString
         (
@@ -9315,9 +9381,6 @@ int lLenghtBuffer            /* i  Buffer length           */
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteProjectById(int iProjectId);
-
-    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_DeleteProjectById2(int iProjectId,  uint flags);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_DeleteProject
@@ -9863,7 +9926,7 @@ int lLenghtBuffer            /* i  Buffer length           */
     }
     #endregion
 
-    private static void AppendToEnvironmentPath(string path)
+    public static void AppendToEnvironmentPath(string path)
     {
         // I based the maximum length of the path value on the documentation of 
         // SetEnvironmentVariable
@@ -10485,20 +10548,6 @@ int lLenghtBuffer            /* i  Buffer length           */
 
     [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr workspace_selectConfBlockVars(int iConfigBlockId);
- 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct WorkspaceVarValueInfo
-    {
-        public int opType;
-        public int valueType;
-        public int valueInt;
-        public string valueString ;
-        public double valueDouble;
-     };
-
-
-    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
-    public static extern IntPtr workspace_getDataBufferBufferProperty(IntPtr hWorkspaceBuffer, WorkspaceDmsBufferVariablesProperty propertyId, int iIndex);
 
     [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
     public static extern int workspace_getItemCountInDataBuffer(IntPtr hWorkspaceBuffer);
@@ -10894,19 +10943,6 @@ int lLenghtBuffer            /* i  Buffer length           */
         return listOfColumns;
     }
 
-    public static SortedList<string, int> GetColumnIdsKeyedByNameFromTableInList(int iTableId)
-    {
-        SortedList<string, int> htAttrVals = new SortedList<string, int>(StringComparer.CurrentCultureIgnoreCase);
-
-        int iAttrDefCount = PWWrapper.aaApi_SelectColumnsByTable(iTableId);
-
-        for (int i = 0; i < iAttrDefCount; i++)
-        {
-            htAttrVals.AddWithCheckNoNullsInKeysOrValues(PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, i), PWWrapper.aaApi_GetColumnNumericProperty(ColumnProperty.ColumnID, i));
-        }
-
-        return htAttrVals;
-    }
 
     public static Hashtable GetColumnIdsKeyedByNameFromTable(int iTableId)
     {
@@ -10940,8 +10976,7 @@ int lLenghtBuffer            /* i  Buffer length           */
             string sColumnName = PWWrapper.aaApi_GetColumnStringProperty(ColumnProperty.Name, i);
 
             if (!htAttrVals.ContainsKey(iColId))
-                // htAttrVals.Add(iColId, sColumnName.ToLower());
-                htAttrVals.Add(iColId, sColumnName);
+                htAttrVals.Add(iColId, sColumnName.ToLower());
         }
 
         return htAttrVals;
@@ -11236,6 +11271,18 @@ int lLenghtBuffer            /* i  Buffer length           */
         return string.Empty;
     }
 
+    public static string GetActiveDatasourceName()
+    {
+        StringBuilder sbDSN = new StringBuilder(1024);
+
+        if (PWWrapper.aaApi_GetActiveDatasourceName(sbDSN, sbDSN.Capacity))
+        {
+            return sbDSN.ToString();
+        }
+
+        return string.Empty;
+    }
+
     public static string GetDocumentNamePath(Guid docGuid)
     {
         StringBuilder sbDocPath = new StringBuilder(5096);
@@ -11524,7 +11571,7 @@ int lLenghtBuffer            /* i  Buffer length           */
     (
         int iProjectNo, // in - project id
         int iDocumentNo, // in - document id
-        Dictionary<string, string> dictPossiblyCaseSensitive, // in diction with column names as keys and new values as values
+        Dictionary<string, string> dictPossiblyCaseSensitive, // in dictionary with column names as keys and new values as values
         bool bAddSheet
     )
     {
@@ -12389,6 +12436,319 @@ int lLenghtBuffer            /* i  Buffer length           */
 
 }
 
+public class CommonEnvironmentMethods
+{
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnv(ref int lplEnvironmentId, int lType, string lpctstrTableName, string lpctstrTableDesc,
+        string lpctstrName, string lpctstrDesc, int lFlags, int lAttrRecId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateTable(ref int plTableId, int lTableType, string lpctstrTableName, string lpctstrTableDesc);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnvAttrDef([In] ref AADMSEATTRDEF lpAttrGuiDef   /* i Attribute definition */ );
+
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteEnvAttrDefs(int iEnvironmentId, int iTableId, int iColumnId);
+
+    //[StructLayout(LayoutKind.Sequential)]
+    //public struct AADMSEATTRDEF
+    //{
+    //    public uint ulFlags;                  /* i Specifies valid fields       */
+    //    public int lEnvironmentId;            /* i Environment ID               */
+    //    public int lTableId;                  /* i Attribute table ID           */
+    //    public int lColumnId;                 /* i Attribute column ID          */
+    //    public int lCtlType;                  /* i Specifies attribute representation field type */
+    //    public string lpctstrEditFont;        /* i attribute font name */
+    //    public int lEditFontHeight;           /* i font height */
+    //    public int lFieldFlags;               /* i Field flags       */
+    //    public int lDefaultType;              /* i Default value type       */
+    //    public string lpctstrDefValue;        /* i string specifying attribute default value.    */
+    //    public int lFieldLength;              /* i Field length            */
+    //    public string lpctstrFldFormat;       /* i attribute format string             */
+    //    public int lFieldAccess;              /* i Attribute Access type      */
+    //    public int lValListType;              /* i Value list type      */
+    //    public string lpctstrValListSource;   /* i value list source            */
+    //    public string lpctstrExtra1;          /* i extra value 1            */
+    //    public string lpctstrExtra2;          /* i extra value 2            */
+    //    public string lpctstrExtra3;          /* i extra value 3            */
+    //    public string lpctstrExtra4;          /* i extra value 4            */
+    //    public string lpctstrExtra5;          /* i extra value 5            */
+    //    public uint ulVerifyFlags;            /* i Verify flags          */
+    //}
+
+    // BOOL aaApi_CreateEnvAttrGuiDef(LPAADMSEATRGUIDEF lpAttrGuiDef)
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnvAttrGuiDef(ref MyAADMSEATRGUIDEF lpAttrGuiDef);
+
+
+    // BOOL aaApi_ModifyEnvAttrGuiDef  ( LPAADMSEATRGUIDEF  lpAttrGuiDef   )
+    [DllImport("dmscli.dll", CharSet = CharSet.Ansi)]
+    public static extern bool aaApi_ModifyEnvAttrGuiDef(ref MyAADMSEATRGUIDEF guiDef);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Ansi)]
+    public static extern bool aaApi_ModifyTable2(int iTableId, int iTableType, IntPtr lpctstrName, IntPtr lpctstrDesc,
+                                                 ref DMSTABLECOL_ITEM pAddColumns, uint columnCount);
+
+
+
+    // BOOL aaApi_DeleteEnvAttrGuiDefs(LONG lEnvironmentId, LONG lTableId, LONG lColumnId, LONG lGuiId )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteEnvAttrGuiDefs(int iEnvironmentId, int iTableId, int iColumnId, int iGuiId);
+
+
+    // BOOL aaApi_ModifyEnvAttrDef  ( LPAADMSEATTRDEF  lpAttrDef   )   
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_ModifyEnvAttrDef(ref AADMSEATTRDEF attrDef);
+
+    // BOOL aaApi_CreateEnvTriggerDef(LONG lEnvironmentId, LONG lTableId, LONG lColumnId, 
+    //                                  LONG lTrigColumnId, LONG lOrderNo, LONG lValueType, LPCWSTR lpctstrValue )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnvTriggerDef(int lEnvironmentId, int lTableId, int lColumnId, int lTrigColumnId,
+        int lOrderNo, int lValueType, IntPtr lpctstrValue);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnvTriggerDef(int lEnvironmentId, int lTableId, int lColumnId, int lTrigColumnId,
+        int lOrderNo, int lValueType, string lpctstrValue);
+
+    // BOOL aaApi_ModifyEnvTriggerDef(LONG lEnvironmentId, LONG lTableId, LONG lColumnId, 
+    //                                  LONG lTrigColumnId, LONG lOrderNo, LONG lValueType, LPCWSTR lpctstrValue )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_ModifyEnvTriggerDef(int lEnvironmentId, int lTableId, int lColumnId, int lTrigColumnId,
+        int lOrderNo, int lValueType, IntPtr lpctstrValue);
+
+
+    // BOOL aaApi_DeleteEnvTriggerDefs(LONG lEnvironmentId, LONG lTableId, LONG lColumnId, LONG lTrigColumnId )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteEnvTriggerDefs(int lEnvironmentId, int lTableId, int lColumnId, int lTrigColumnId);
+
+
+    //BOOL aaApi_CreateEnvValListItem(LONG lEnvironmentId, LONG lTableId, LONG lColumnId, LONG lValueId, LPCWSTR lpctstrListValue, LPCWSTR lpctstrDesc )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CreateEnvValListItem(int lEnvironmentId, int lTableId, int lColumnId, int lValueId,
+        IntPtr lpctstrListValue, IntPtr lpctstrDesc);
+
+    // BOOL aaApi_DeleteEnvValListItems(LONG lEnvironmentId, LONG lTableId, LONG lColumnId, LONG lValueId )
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteEnvValListItems(int lEnvironmentId, int lTableId, int lColumnId, int lValueId);
+
+
+    // BOOL aaApi_DeleteColumn  ( LONG  lTableId, LONG lColumnId ) 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteColumn(int lTableId, int lColumnId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DeleteColumnExt(int lTableId, int lColumnId, uint uiFlags);
+
+    public static int GetInterfaceInfo(string sInterfaceName)
+    {
+        int iNumInterfaces = PWWrapper.aaApi_SelectAllGuis();
+
+        int iInterfaceId = -1;
+
+        // Get Inteface ID
+        for (int i = 0; i < iNumInterfaces; i++)
+        {
+            string s = PWWrapper.aaApi_GetGuiStringProperty(PWWrapper.GuiProperty.Name, i);
+
+            if (s.ToLower() == sInterfaceName.ToLower())
+            {
+                iInterfaceId = PWWrapper.aaApi_GetGuiId(i);
+                break;
+            }
+        }
+
+        return iInterfaceId;
+    }
+
+    public static int GetColumnInfo(int iEnvTableID, string sAttributeName)
+    {
+        int iColumnSelect = PWWrapper.aaApi_SelectColumnsByTable(iEnvTableID);
+        int iColumnID = -1;
+
+        for (int i = 0; i < iColumnSelect; i++)
+        {
+            string sColName = PWWrapper.aaApi_GetColumnStringProperty(PWWrapper.ColumnProperty.Name, i);
+            if (sColName.ToLower().Equals(sAttributeName.ToLower()))
+            {
+                iColumnID = PWWrapper.aaApi_GetColumnNumericProperty(PWWrapper.ColumnProperty.ColumnID, i);
+                break;
+            }
+        }
+
+        return iColumnID;
+    }
+
+
+    public enum TableColumnFlags : uint
+    {
+        DMS_TABLECOL_COLF_NONNULL = 0x00000001,
+        DMS_TABLECOL_COLF_INDEX = 0x00000002
+    }
+
+    public enum EnvAttributeFlags : uint
+    {
+        AADMSEATDF_ENVIRONMENTID = 0x00000001,
+        AADMSEATDF_TABLEID = 0x00000002,
+        AADMSEATDF_COLUMNID = 0x00000004,
+        AADMSEATDF_CONTROLTYPE = 0x00000008,
+        AADMSEATDF_EDITFONT = 0x00000010,
+        AADMSEATDF_EDITFONT_HEIGHT = 0x00000020,
+        AADMSEATDF_FIELDFLAGS = 0x00000040,
+        AADMSEATDF_DEFVALUE_TYPE = 0x00000080,
+        AADMSEATDF_DEFVALUE = 0x00000100,
+        AADMSEATDF_FIELDLENGTH = 0x00000200,
+        AADMSEATDF_FIELDFORMAT = 0x00000400,
+        AADMSEATDF_FIELDACCESS = 0x00000800,
+        AADMSEATDF_VALLIST_TYPE = 0x00001000,
+        AADMSEATDF_VALLIST_SOURCE = 0x00002000,
+        AADMSEATDF_EXTRA1 = 0x00004000,
+        AADMSEATDF_EXTRA2 = 0x00008000,
+        AADMSEATDF_EXTRA3 = 0x00010000,
+        AADMSEATDF_EXTRA4 = 0x00020000,
+        AADMSEATDF_EXTRA5 = 0x00040000,
+        AADMSEATDF_VERIFYFLAGS = 0x10000000,
+        AADMSEATDF_REQUIRED = (AADMSEATDF_ENVIRONMENTID | AADMSEATDF_TABLEID | AADMSEATDF_COLUMNID),
+        AADMSEATDVF_NONEMPTY4FORMAT = 0x00000001 /* i  asks to check non empty values for format; */
+        /* o  has non empty values */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AADMSEATTRDEF
+    {
+        public uint ulFlags;
+        public int lEnvironmentId;             /* *< Specifies owning environment ID. */
+        public int lTableId;                   /* *< Specifies document attribute table ID. */
+        public int lColumnId;                  /* *< Specifies attribute column ID. */
+        public int lCtlType;                   /* *< Specifies attribute representation field type. For the list of possible values
+                           see \ref aadmsdef_InterfaceIndependentAttributeDefinitions_AttributeRepresentationFieldTypes. */
+        public IntPtr lpctstrEditFont;         /* *< Pointer to the null-terminated string specifying attribute font name. */
+        public int lEditFontHeight;            /* *< Specifies attribute font height. */
+        public int lFieldFlags;                /* *< Specifies attribute parameter mask. For the list of possible flag values see
+                               \ref aadmsdef_InterfaceIndependentAttributeDefinitions_AttributeParameterFlags. */
+        public EnvDefaultValueTypes lDefaultType;               /* *< Specifies attribute default value type. For the list of possible values see
+                               \ref aadmsdef_InterfaceIndependentAttributeDefinitions_AttributeDefaultValueTypes. */
+        public IntPtr lpctstrDefValue;         /* *< Pointer to the null-terminated string specifying attribute default value. */
+        public int lFieldLength;               /* *< Specifies attribute value maximal length. */
+        public IntPtr lpctstrFldFormat;        /* *< Pointer to the null-terminated string, specifying attribute format string */
+        public int lFieldAccess;               /* *< Specifies attribute access type. For the list of possible values see
+                               \ref aadmsdef_InterfaceIndependentAttributeDefinitions_AttributeAccessTypes. */
+        public int lValListType;               /* *< Specifies attribute value list type. For the list of possible values see
+                               \ref aadmsdef_InterfaceIndependentAttributeDefinitions_AttributeValueListsTypes. */
+        public IntPtr lpctstrValListSource;    /* *< Pointer to the null-terminated string specifying attribute value list source
+                                                         string. For the source strings overview see \ref
+                                                         aadmsdef_InterfaceIndependentAttributeDefinitions_AttributeValueListsTypes. */
+        public IntPtr lpctstrExtra1;           /* *< Pointer to the null-terminated string specifying attribute 1st extra value. */
+        public IntPtr lpctstrExtra2;           /* *< Pointer to the null-terminated string specifying attribute 2nd extra value. */
+        public IntPtr lpctstrExtra3;           /* *< Pointer to the null-terminated string specifying attribute 3rd extra value. */
+        public IntPtr lpctstrExtra4;           /* *< Pointer to the null-terminated string specifying attribute 4th extra value. */
+        public IntPtr lpctstrExtra5;           /* *< Pointer to the null-terminated string specifying attribute 5th extra value. */
+        public uint ulVerifyFlags;             /* *< Verify flags (AADMSEATDVF_*) */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct DMSTABLECOL_ITEM
+    {
+        public IntPtr name;           /**< Specifies name of the column. */
+        public IntPtr description;    /**< Specifies description of the column. */
+        public IntPtr format;         /**< Column format to use in registering as a link table. */
+        public int columnId;       /**< Specifies column ID that is used in document management system registration. */
+        public int sqlType;        /**< Column SQL type. See \ref aadmsdef_TablesColumnsSQLstatements_SqlDataType "AASQL data types" for possible values. */
+        public int precision;      /**< Precision of the column type. If not applicable, should be set to (-1). */
+        public int scale;          /**< Scale of the column type. If not applicable, should be set to (-1). */
+        public IntPtr sqlTypeString;  /**< SQL type given by string. Should be used when there is no corresponding AASQL type. \em sqlType should be set to #AASQL_UNKNOWN. */
+        public int columnCType;    /**< Column SQL type. Must be from AASQL_C* range. */
+        public int columnLength;   /**< Length of the column. */
+        public int flags;          /**< Flags for the column. See \ref aadmsdef_TablesColumnsSQLstatements_TableColumnFlags "Table Column Flags" for possible values. */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MyAADMSEATRGUIDEF
+    {
+        public uint ulFlags;            /* i Specifies valid fields       */
+        public int lEnvironmentId;      /* i Environment ID               */
+        public int lTableId;            /* i Attribute table ID           */
+        public int lColumnId;           /* i Attribute column ID          */
+        public int lGuiId;              /* i Interface ID                 */
+        public int lPageNo;             /* i Property page ID             */
+        public int lTabOrder;           /* i Tab order on the page        */
+        public IntPtr lpctstrLabel;     /* i Text for the label           */
+        public IntPtr lpctstrLabelFont; /* i Label font name              */
+        public int lLabelFontH;         /* i Label font height            */
+        public int lLabelX;             /* i Label position (x-axis)      */
+        public int lLabelY;             /* i Label position (y-axis)      */
+        public int lLabelWidth;         /* i Label width                  */
+        public int lLabelHeight;        /* i Label height                 */
+        public int lEditX;              /* i Edit field position (x-axis) */
+        public int lEditY;              /* i Edit field position (y-axis) */
+        public int lEditWidth;          /* i Edit field width             */
+        public int lEditHeight;         /* i Edit field height            */
+        public IntPtr lpctstrPrompt;    /* i Message text                 */
+        public int lGuiFlags;           /* i Interface parameter          */
+    }
+
+    public enum EnvAttributeParameterFlags : uint
+    {
+        // Attribute Parameter Flags
+        AADMS_ATTRDEF_FLD_UNIQUE = 0x00000001,              // The attribute value is unique.
+        AADMS_ATTRDEF_FLD_REQUIRED = 0x00000002,            // The attribute value is required.
+        AADMS_ATTRDEF_FLD_EDITABLE_IF_FINAL = 0x00000010,   // Attribute is editable when the document is in final workflow state.
+        AADMS_ATTRDEF_FLD_FORCE_UPDATE = 0x00000020,        // Force call of update trigger(if set), regardless of the value changes.
+        AADMS_ATTRDEF_FLD_MULTISEL = 0x00000040,            // Attribute value list is multi-selectable.
+        AADMS_ATTRDEF_FLD_LIMIT2LIST = 0x00000080,          // Only the values from the list can be chosen.
+        AADMS_ATTRDEF_FLD_COPY_CLR_NEWSHEET = 0x00001000,   // Clear attribute when new sheet created.
+        AADMS_ATTRDEF_FLD_COPY_CLR_INENV = 0x00002000,      // Clear attribute when copying inside environment.
+        AADMS_ATTRDEF_FLD_COPY_CLR_OUTENV = 0x00004000,     // Clear attribute when copying outside environment. 
+        AADMS_ATTRDEF_FLD_COPY_CLR_OUTDB = 0x00008000       // Clear attribute when copying outside the database.
+    }
+
+    public enum EnvDefaultValueTypes : int
+    {
+        // Attribute Default Value Types
+        AADMS_EATTRDEF_DEFTYPE_NONE = 0,        // No default value is set.
+        AADMS_EATTRDEF_DEFTYPE_FIXED = 1,       // Default value is a string. 
+        AADMS_EATTRDEF_DEFTYPE_SELECT = 2,      // Default value is returned by a select statement.
+        AADMS_EATTRDEF_DEFTYPE_SYSTEM_VAR = 3,  // Default value is a system variable.
+        AADMS_EATTRDEF_DEFTYPE_FUNCTION = 4     // Default value is returned by a function.
+    }
+
+    public enum EnvValueTypes : int
+    {
+        // Attribute Value Lists Types
+        AADMS_EATTRDEF_VLLSTTYPE_NONE = 0,      // Value list type is not specified. 
+        AADMS_EATTRDEF_VLLSTTYPE_SELECT = 1,    // List contains selected values. 
+        AADMS_EATTRDEF_VLLSTTYPE_FUNCTION = 2, // List contains function returned value. 
+        AADMS_EATTRDEF_VLLSTTYPE_FIXED = 3      // Value list is stored in the database.  
+    }
+
+    public enum EnvFieldTypes : int
+    {
+        // Attribute Representation Field Types
+        AADMS_EATTRDEF_CTLTYPE_EDIT_FIELD = 1,  // The field is an edit field. 
+        AADMS_EATTRDEF_CTLTYPE_CHECK_BOX = 2,   // The field is represented by a check-box. 
+        AADMS_EATTRDEF_CTLTYPE_MULTI_EDIT = 3   // The field is multi-line edit field.  
+    }
+
+    public enum EnvAccessTypes : int
+    {
+        // Attribute Access Types
+        AADMS_EATTRDEF_FLDACCESS_EDIT = 1,      // The field has edit access. 
+        AADMS_EATTRDEF_FLDACCESS_READONLY = 2   // The field has read-only access.
+    }
+
+    public enum EnvTriggerTypes : int
+    {
+        AADMS_ETRIGGER_VALTYPE_FIXED = 1,       // Trigger value is a text string. 
+        AADMS_ETRIGGER_VALTYPE_SELECT = 2,      // Trigger value is returned by a select statement.
+        AADMS_ETRIGGER_VALTYPE_SYSTEM_VAR = 3,  // The first field from the first record selected by the select statement is taken for the trigger value.
+        AADMS_ETRIGGER_VALTYPE_FUNCTION = 4,    // Trigger value is returned by the function.
+        AADMS_EVAL_FUNCTION_NAME_SEPARATOR = ';'
+    }
+
+}
+
 public class PWSearch
 {
     // added per Dan 2020-01-17
@@ -12446,7 +12806,6 @@ public class PWSearch
         string sViewName
     );
 
-#if TO_BE_REMOVED_OR_REPLACED_MWBSI
     [DllImport("PWSearchWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     public static extern int CreateSearchFolder
     (
@@ -12462,7 +12821,6 @@ public class PWSearch
         int lParentProjectId,
         int lParentQueryId
     );
-#endif
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_SQueryDelete(int iQueryId);
@@ -17186,21 +17544,26 @@ public class BPSUtilities
         }
     }
 
-    private static string GetLogFolder()
+    public static string GetLogFolder()
     {
+        // System.Diagnostics.Debug.WriteLine(System.Reflection.Assembly.GetCallingAssembly().Location);
+
         string sLogPath = Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location);
 
         try
         {
             // should mean is Windows app and we want to put in special folder
-            if (string.IsNullOrEmpty(Console.Title))
+            // if (string.IsNullOrEmpty(Console.Title))
+            if (System.Reflection.Assembly.GetCallingAssembly().Location.ToLower().EndsWith(".dll"))
             {
                 sLogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     @"Bentley\Logs");
             }
         }
-        catch // (Exception ex)
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}");
+
             sLogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 @"Bentley\Logs");
         }
@@ -17240,6 +17603,9 @@ public class BPSUtilities
                 }
             }
         }
+
+        // Console.WriteLine($"Log Path is '{sLogPath}'");
+        // System.Diagnostics.Debug.WriteLine($"Log Path is '{sLogPath}'");
 
         return sLogPath;
     }
@@ -17495,6 +17861,13 @@ public class BPSUtilities
         return bValue;
     }
 #endif
+
+    private static Regex _illegalInFileName = new Regex(string.Format("[{0}]", Regex.Escape(new string(Path.GetInvalidFileNameChars()))), RegexOptions.Compiled);
+
+    public static string CleanFileName(string sFileName)
+    {
+        return _illegalInFileName.Replace(sFileName, "");
+    }
 }
 
 public sealed class PWSession : IDisposable
@@ -18088,6 +18461,150 @@ public class SMTPMailSender
             msg.Body = sMailBody;
 
             msg.Priority = System.Net.Mail.MailPriority.Normal;
+
+            if (!string.IsNullOrEmpty(sFileAttachment))
+            {
+                if (File.Exists(sFileAttachment))
+                {
+                    System.Net.Mail.Attachment fileAttachment =
+                        new System.Net.Mail.Attachment(sFileAttachment,
+                        System.Net.Mime.MediaTypeNames.Application.Octet);
+
+                    msg.Attachments.Add(fileAttachment);
+                }
+            }
+
+            //Add the Creddentials
+            System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient();
+
+            if (!string.IsNullOrEmpty(sUserName) && !string.IsNullOrEmpty(sPassword))
+            {
+                System.Net.NetworkCredential netCred = new System.Net.NetworkCredential(sUserName, sPassword);
+                client.Credentials = netCred;
+            }
+            else
+            {
+                client.UseDefaultCredentials = true;
+            }
+
+            client.Port = iSmtpPort; //25; //or use 587            
+            client.Host = sSmtpServer; //"localhost";
+            client.EnableSsl = bEnableSSL;
+
+            client.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network; //use Network for SmtpDeliveryMethod
+
+            object userState = msg;
+
+            try
+            {
+                client.Send(msg);
+                // client.SendAsync(msg, userState);
+                BPSUtilities.WriteLog("Sent Mail to '{0}' OK", sToEmails);
+            }
+            catch (System.Net.Mail.SmtpException ex)
+            {
+                BPSUtilities.WriteLog(
+                    String.Format("{0}", ex.Message));
+                BPSUtilities.WriteLog(
+                    String.Format("{0}", ex.StackTrace));
+
+                Exception ex1 = (Exception)ex;
+
+                while (ex1.InnerException != null)
+                {
+                    BPSUtilities.WriteLog(
+                            "--------------------------------");
+                    BPSUtilities.WriteLog(
+                            "The following InnerException reported: " + ex1.InnerException.ToString());
+                    ex1 = ex1.InnerException;
+                }
+
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            BPSUtilities.WriteLog(
+                String.Format("{0}", ex.Message));
+            BPSUtilities.WriteLog(
+                String.Format("{0}", ex.StackTrace));
+
+            while (ex.InnerException != null)
+            {
+                BPSUtilities.WriteLog(
+                        "--------------------------------");
+                BPSUtilities.WriteLog(
+                        "The following InnerException reported: " + ex.InnerException.ToString());
+                ex = ex.InnerException;
+            }
+
+            return false;
+        }
+
+        msg.Dispose();
+
+        // BPSUtilities.WriteLog("Sent mail OK");
+        return true;
+    }//SendMail
+
+    public static bool SendHTMLMailWithPriority(string sMailSubject,
+        string sMailBody, string sToEmails, string sFromEMail, string sFileAttachment,
+        string sSmtpServer, int iSmtpPort, bool bEnableSSL, string sUserName, string sEncryptedPassword, System.Net.Mail.MailPriority mailPriority)
+    {
+        string sPassword = string.Empty;
+
+        if (!string.IsNullOrEmpty(sUserName) && !string.IsNullOrEmpty(sEncryptedPassword))
+        {
+            try
+            {
+                sPassword = CryptoProvider.GetDecryptedPassword(sSmtpServer, sUserName, sEncryptedPassword);
+            }
+            catch (Exception ex)
+            {
+                BPSUtilities.WriteLog("Error: {0}\n{1}", ex.Message, ex.StackTrace);
+            }
+        }
+
+        if (string.IsNullOrEmpty(sSmtpServer) || iSmtpPort < 1 ||
+                string.IsNullOrEmpty(sFromEMail) || string.IsNullOrEmpty(sToEmails))
+        {
+            BPSUtilities.WriteLog("Server: {0}, Port: {1}, From: {2}, To: {3}",
+                sSmtpServer, iSmtpPort, // sUserName, 
+                                        // sPassword, 
+                sFromEMail, sToEmails);
+            BPSUtilities.WriteLog("Unable to get email sending parameters");
+            return false;
+        }
+
+        //Build The MSG
+        System.Net.Mail.MailMessage msg = new System.Net.Mail.MailMessage();
+
+        try
+        {
+            // msg.To.Add(m_sPlantManagerEmail);
+
+            string[] sToEmailArray = sToEmails.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string sToEmail in sToEmailArray)
+            {
+                msg.To.Add(sToEmail);
+            }
+
+            if (msg.To.Count == 0)
+            {
+                BPSUtilities.WriteLog("No recipients defined");
+                return false;
+            }
+
+            msg.From = new System.Net.Mail.MailAddress(sFromEMail);
+            msg.Subject = sMailSubject;
+            msg.SubjectEncoding = System.Text.Encoding.UTF8;
+            // msg.Body = sBody;
+            msg.BodyEncoding = System.Text.Encoding.ASCII;
+            msg.IsBodyHtml = true;
+            msg.Body = sMailBody;
+
+            msg.Priority = mailPriority;
 
             if (!string.IsNullOrEmpty(sFileAttachment))
             {
@@ -18827,7 +19344,6 @@ public class XMLSpreadsheetDatasetTools
 
         return ds;
     }
-
 }
 
 public class SavedSearches
@@ -18914,26 +19430,6 @@ public class SavedSearches
 
 public static class Extensions
 {
-    public static Dictionary<int, string> GetDictionaryIntString(this DataTable dt, int iKeyColumnIndex, int iValueColumnIndex)
-    {
-        return dt.AsEnumerable()
-          .ToDictionary(row => row.Field<int>(iKeyColumnIndex),
-                                    row => row.Field<string>(iValueColumnIndex));
-    }
-
-    public static Dictionary<string, string> GetDictionaryStringString(this DataTable dt, int iKeyColumnIndex, int iValueColumnIndex)
-    {
-        return dt.AsEnumerable()
-          .ToDictionary(row => row.Field<string>(iKeyColumnIndex),
-                                    row => row.Field<string>(iValueColumnIndex));
-    }
-    public static Dictionary<string, int> GetDictionaryStringInt(this DataTable dt, int iKeyColumnIndex, int iValueColumnIndex)
-    {
-        return dt.AsEnumerable()
-          .ToDictionary(row => row.Field<string>(iKeyColumnIndex),
-                                    row => row.Field<int>(iValueColumnIndex));
-    }
-
     public static string SafeGet<TKey>(this SortedList<TKey, string> sortedList, TKey key)
     {
         if (sortedList.ContainsKey(key))
@@ -19004,26 +19500,22 @@ public static class Extensions
     {
         StringBuilder sbContents = new StringBuilder();
 
-        foreach (KeyValuePair<TKey, TValue> kvp in sortedList)
+        try
         {
-            try
+            if (sortedList.Count > 0)
             {
-                string sKey = string.Empty, sValue = string.Empty;
-
-                if (kvp.Key != null)
-                    sKey = kvp.Key.ToString();
-
-                if (kvp.Value != null)
-                    sValue = kvp.Value.ToString();
-
-                string sAppend = string.Format(keyFormatString, sKey, sValue);
-
-                sbContents.AppendLine(sAppend);
+                foreach (KeyValuePair<TKey, TValue> kvp in sortedList)
+                {
+                    if (sbContents.Length == 0)
+                        sbContents.Append(string.Format(keyFormatString, kvp.Key.ToString(), ((kvp.Value == null) ? "" : kvp.Value.ToString())));
+                    else
+                        sbContents.AppendLine(string.Format(keyFormatString, kvp.Key.ToString(), ((kvp.Value == null) ? "" : kvp.Value.ToString())));
+                }
             }
-            catch
-            {
-                return string.Empty;
-            }
+        }
+        catch
+        {
+
         }
 
         return sbContents.ToString();
@@ -19036,24 +19528,10 @@ public static class Extensions
 
         foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
         {
-            try
-            {
-                string sKey = string.Empty, sValue = string.Empty;
-
-                if (kvp.Key != null)
-                    sKey = kvp.Key.ToString();
-
-                if (kvp.Value != null)
-                    sValue = kvp.Value.ToString();
-
-                string sAppend = string.Format(keyFormatString, sKey, sValue);
-
-                sbContents.AppendLine(sAppend);
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            if (sbContents.Length == 0)
+                sbContents.Append($"{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
+            else
+                sbContents.Append($"\n{string.Format(keyFormatString, kvp.Key.ToString())}{((kvp.Value == null) ? "" : kvp.Value.ToString())}");
         }
 
         return sbContents.ToString();
@@ -19494,6 +19972,7 @@ public static class OtherExtensions
 public class FolderClass
 {
     public int Id { get; set; }
+    public string FolderGuid { get; set; }
     public int? ParentId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
@@ -19539,3 +20018,4 @@ public class FolderClass
         // return folderNode.Value.CalculatedPath;
     }
 }
+
