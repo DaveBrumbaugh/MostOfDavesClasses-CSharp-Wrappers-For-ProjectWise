@@ -44,8 +44,8 @@ public class PWWrapper
 
     public enum ProjectTypes : int
     {
-        AADMS_PROJECT_TYPE_NORMAL = 0,     /**< Specifies a normal project */
-        AADMS_PROJECT_TYPE_RICH = 2      /**< Specifies a rich project that may contain ODS properties */
+        AADMS_PROJECT_TYPE_NORMAL = 0,     /* Specifies a normal project */
+        AADMS_PROJECT_TYPE_RICH = 2      /* Specifies a rich project that may contain ODS properties */
     }
 
     public enum WorkflowTypes : int
@@ -189,6 +189,20 @@ public class PWWrapper
         LocationID = 55, // guid
         MIMEType = 56, // string
         LocationSource = 58 // numeric
+    }
+
+    public enum WorkspaceProfileProperty : int
+    {
+        ID = 1, // numeric
+        Name = 2,
+        Description = 3,
+        Root = 4,
+        UserCfgName = 5,
+        ProjectCfgName = 6,
+        UserIntName = 7,
+        Flags = 8, // numeric
+        Parameters = 9,
+        AcadProfileName = 10 
     }
 
     public enum ProjectProperty : int
@@ -800,11 +814,11 @@ public class PWWrapper
         AAOPER_DOC_COPYOUT = AAOPER_DOC_FIRST + 7,
         AAOPER_DOC_EXPORT = AAOPER_DOC_FIRST + 8,
         AAOPER_DOC_CHECKIN = (AAOPER_DOC_FIRST + 9),
-        AAOPER_DOC_CHECKIN_LEAVE_COPY = (AAOPER_DOC_FIRST + 10),      /**< Specifies to check in the document and leave local copy */
+        AAOPER_DOC_CHECKIN_LEAVE_COPY = (AAOPER_DOC_FIRST + 10),      /* Specifies to check in the document and leave local copy */
 
-        AAOPER_DOC_CREATE_LINK_DATA = (AAOPER_DOC_FIRST + 30),      /**<  */
-        AAOPER_DOC_UPDATE_LINK_DATA = (AAOPER_DOC_FIRST + 31),      /**<  */
-        AAOPER_DOC_DELETE_LINK_DATA = (AAOPER_DOC_FIRST + 32),      /**<  */
+        AAOPER_DOC_CREATE_LINK_DATA = (AAOPER_DOC_FIRST + 30),      
+        AAOPER_DOC_UPDATE_LINK_DATA = (AAOPER_DOC_FIRST + 31),      
+        AAOPER_DOC_DELETE_LINK_DATA = (AAOPER_DOC_FIRST + 32),      
     }
 
     public enum HookActions : int
@@ -1183,17 +1197,17 @@ public class PWWrapper
 
     public /*unsafe*/ struct _AADOC_ITEM
     {
-        public Int32 lProjectId;     /**< Specifies the unique document item project identifier. */
-        public Int32 lDocumentId;    /**< Specifies the unique document item identifier. */
+        public Int32 lProjectId;     /* Specifies the unique document item project identifier. */
+        public Int32 lDocumentId;    /* Specifies the unique document item identifier. */
     }
 
     public struct _AAEALINKAGE
     {
-        public int lLinkageType;           /**< Specifies the type of linkage. See \ref aadmsdef_TablesColumnsSQLstatements_AttributeLinkageTypes "Attribute Linkage Types" for possible values. */
+        public int lLinkageType;           /* Specifies the type of linkage. See \ref aadmsdef_TablesColumnsSQLstatements_AttributeLinkageTypes "Attribute Linkage Types" for possible values. */
         //union
         //{
-        public _AADOC_ITEM documentId;    /**< Specifies the structure containing the information about the document. This data member is valid only if the \em lLinkageType parameter is #AADMS_EALNK_DOCUMENT. */
-        public int lEnvironmentId;      /**< Specifies the identifier of the environment. This data member is valid only if \em lLinkageType parameter is #AADMS_EALNK_ENVIRONMENT. */
+        public _AADOC_ITEM documentId;    /* Specifies the structure containing the information about the document. This data member is valid only if the \em lLinkageType parameter is #AADMS_EALNK_DOCUMENT. */
+        public int lEnvironmentId;      /* Specifies the identifier of the environment. This data member is valid only if \em lLinkageType parameter is #AADMS_EALNK_ENVIRONMENT. */
         //};
     }
 
@@ -1398,7 +1412,7 @@ public class PWWrapper
         ref int pResult
      );
 
-    public delegate int DoumentHookFunction
+    public delegate int DocumentHookFunction
     (int hookId,
         int hookType,
         ref AaDocumentsParam aParam1,
@@ -2376,7 +2390,7 @@ int lNameSize      /* i  lptstrName size in characters      */
        int lProjectNo,        /* i  Project number              */
        int lDocumentId,       /* i  Document number             */
        String lpctstrWorkdir,    /* i  Working directory           */
-       String lptstrFileName,    /* o  File name with full path    */
+       StringBuilder lptstrFileName,    /* o  File name with full path    */
        int lBufferSize        /* i  Buffer size for file name   */
     );
 
@@ -2469,6 +2483,10 @@ int lNameSize      /* i  lptstrName size in characters      */
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_CheckOutDocument(int lProjectNo, int lDocumentId,
         string lpctstrWorkdir, StringBuilder lptstrFileName, int lBufferSize);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_CheckInDocumentLeaveCopy(int ProjectId, int DocumentId);
+
 
     [DllImport("dmawin.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_OpenDocument(int lProjectNo, int lDocumentId, bool bReadOnly);
@@ -5143,18 +5161,18 @@ uint lAccessMask       /* i  Access Mask                    */
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct AAODSPickList
     {
-        public int lPicklistType;                /**< picklist type (AAODS_PICKLIST_TYPE_*) */
-        public int lPicklistClassId;             /**< class of picklist (AAODS_PICKLIST_TYPE_CLASS)                        */
-        public int lPicklistCodeAttrId;          /**< attribute id of picklist code column (AAODS_PICKLIST_TYPE_CLASS)     */
-        public int lPicklistValueAttrId;         /**< attribute id of picklist value column (AAODS_PICKLIST_TYPE_CLASS)    */
+        public int lPicklistType;                /* picklist type (AAODS_PICKLIST_TYPE_*) */
+        public int lPicklistClassId;             /* class of picklist (AAODS_PICKLIST_TYPE_CLASS)                        */
+        public int lPicklistCodeAttrId;          /* attribute id of picklist code column (AAODS_PICKLIST_TYPE_CLASS)     */
+        public int lPicklistValueAttrId;         /* attribute id of picklist value column (AAODS_PICKLIST_TYPE_CLASS)    */
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1025)]
-        public string sSelect;           /**< SQL SELECT statement (AAODS_PICKLIST_TYPE_SELECT)                    */
-        public bool bForceToList;                /**< force to list */
+        public string sSelect;           /* SQL SELECT statement (AAODS_PICKLIST_TYPE_SELECT)                    */
+        public bool bForceToList;                /* force to list */
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1025)]
-        public string sFileName;         /**< DLL file name */
+        public string sFileName;         /* DLL file name */
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1025)]
-        public string sFunction;         /**< function name */
-        public int lUpdateOnEditSiblingsFlags;   /**< AAQUALID_PICKLIST_UPDATE_ON_EDIT_SIBLING flags*/
+        public string sFunction;         /* function name */
+        public int lUpdateOnEditSiblingsFlags;   /* AAQUALID_PICKLIST_UPDATE_ON_EDIT_SIBLING flags*/
     }
 
     public enum AAODSPickListType : int
@@ -5511,16 +5529,16 @@ string lpctstrDesc    /* i  Project description            */
     //#define SQRY_PROP_PROJECTID                 8
     //#define SQRY_PROP_FROMTYPE                  9
 
-    //#define SQRYC_PROP_QUERYID                1     /**< \b Numeric property. Query identifier. */
-    //#define SQRYC_PROP_CRITERIONID            2     /**< \b Numeric property. Criterion identifier. */
-    //#define SQRYC_PROP_ORGROUPNUMBER          3     /**< \b Numeric property. OR group number. */
-    //#define SQRYC_PROP_FLAGS                  4     /**< \b Numeric property. Flags from \ref aadmsdef_SearchFunctionalityDefinitions_QueryCriteriaconstants_Searchcriteriaflags. */
-    //#define SQRYC_PROP_PROPERTYSET            5     /**< \b Guid property. Property set identifier. */
-    //#define SQRYC_PROP_PROPERTYNAME           6     /**< \b String property. Property name. */
-    //#define SQRYC_PROP_PROPERTYID             7     /**< \b Numeric property. Property identifier. */
-    //#define SQRYC_PROP_RELATION               8     /**< \b Numeric property. Relation. Values from \ref aadmsdef_SearchFunctionalityDefinitions_QueryCriteriaconstants_PropertyRelationsValues. */
-    //#define SQRYC_PROP_FIELDTYPE              9     /**< \b Numeric property. Value type from \ref aadmsdef_FormatUtilityDefinitions_AttributeTypes. */
-    //#define SQRYC_PROP_FIELDVALUE            10     /**< \b String property. Value. */
+    //#define SQRYC_PROP_QUERYID                1     /* \b Numeric property. Query identifier. */
+    //#define SQRYC_PROP_CRITERIONID            2     /* \b Numeric property. Criterion identifier. */
+    //#define SQRYC_PROP_ORGROUPNUMBER          3     /* \b Numeric property. OR group number. */
+    //#define SQRYC_PROP_FLAGS                  4     /* \b Numeric property. Flags from \ref aadmsdef_SearchFunctionalityDefinitions_QueryCriteriaconstants_Searchcriteriaflags. */
+    //#define SQRYC_PROP_PROPERTYSET            5     /* \b Guid property. Property set identifier. */
+    //#define SQRYC_PROP_PROPERTYNAME           6     /* \b String property. Property name. */
+    //#define SQRYC_PROP_PROPERTYID             7     /* \b Numeric property. Property identifier. */
+    //#define SQRYC_PROP_RELATION               8     /* \b Numeric property. Relation. Values from \ref aadmsdef_SearchFunctionalityDefinitions_QueryCriteriaconstants_PropertyRelationsValues. */
+    //#define SQRYC_PROP_FIELDTYPE              9     /* \b Numeric property. Value type from \ref aadmsdef_FormatUtilityDefinitions_AttributeTypes. */
+    //#define SQRYC_PROP_FIELDVALUE            10     /* \b String property. Value. */
 
     public enum SavedQueryProperty : int
     {
@@ -5841,6 +5859,13 @@ string lpctstrDesc    /* i  Project description            */
     );
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_DowngradeProjectToFolder
+    (
+        int iProjectId, // project to downgrade
+        bool bDowngradeSubProjects
+    );
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_SetParentProject
     (
        int lChildId,     /* i  Child project number           */
@@ -5964,6 +5989,8 @@ DocumentCopyFlags ulFlags, /* i  Operation flags               */
        int lUserId          /* i  User number       */
     );
 
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_IsDocumentCopyUpToDate(int ProjectId, int DocumentId);
 
 
     public enum ManagerTypeProperty : int
@@ -6022,23 +6049,23 @@ DocumentCopyFlags ulFlags, /* i  Operation flags               */
         Delete = 0x00000040,
         Free = 0x00000080,
         ChangeWorkflowState = 0x00000100,
-        //#define  AADMS_ACCESS_FREE      0x00000080      /**< Right to free document that is checked-out by other user. */
-        //#define  AADMS_ACCESS_CWST      0x00000100      /**< Right to change workflow state. */
+        //#define  AADMS_ACCESS_FREE      0x00000080      /* Right to free document that is checked-out by other user. */
+        //#define  AADMS_ACCESS_CWST      0x00000100      /* Right to change workflow state. */
         Full = 0x0000FFFF,
         Owner = 0x00000200
     }
 
-    //#define  AADMS_ACCESS_NONE      0x00000000      /**< Access is forbidden. */
-    //#define  AADMS_ACCESS_CNTRL     0x00000001      /**< Right to change object permissions. */
-    //#define  AADMS_ACCESS_WRITE     0x00000002      /**< Right to modify object attributes. */
-    //#define  AADMS_ACCESS_READ      0x00000004      /**< The project is visible in Datasource Tree window, user can view the project's properties. */
-    //#define  AADMS_ACCESS_FWRITE    0x00000008      /**< Right to modify file (used only for document access). */
-    //#define  AADMS_ACCESS_FREAD     0x00000010      /**< Right to read file (used only for document access). */
-    //#define  AADMS_ACCESS_CREATE    0x00000020      /**< Right to create. */
-    //#define  AADMS_ACCESS_DELETE    0x00000040      /**< Right to delete. */
-    //#define  AADMS_ACCESS_FREE      0x00000080      /**< Right to free document that is checked-out by other user. */
-    //#define  AADMS_ACCESS_CWST      0x00000100      /**< Right to change workflow state. */
-    //#define  AADMS_ACCESS_FULL      0x0000FFFF      /**< All rights. */
+    //#define  AADMS_ACCESS_NONE      0x00000000      /* Access is forbidden. */
+    //#define  AADMS_ACCESS_CNTRL     0x00000001      /* Right to change object permissions. */
+    //#define  AADMS_ACCESS_WRITE     0x00000002      /* Right to modify object attributes. */
+    //#define  AADMS_ACCESS_READ      0x00000004      /* The project is visible in Datasource Tree window, user can view the project's properties. */
+    //#define  AADMS_ACCESS_FWRITE    0x00000008      /* Right to modify file (used only for document access). */
+    //#define  AADMS_ACCESS_FREAD     0x00000010      /* Right to read file (used only for document access). */
+    //#define  AADMS_ACCESS_CREATE    0x00000020      /* Right to create. */
+    //#define  AADMS_ACCESS_DELETE    0x00000040      /* Right to delete. */
+    //#define  AADMS_ACCESS_FREE      0x00000080      /* Right to free document that is checked-out by other user. */
+    //#define  AADMS_ACCESS_CWST      0x00000100      /* Right to change workflow state. */
+    //#define  AADMS_ACCESS_FULL      0x0000FFFF      /* All rights. */
 
 
 
@@ -6331,6 +6358,26 @@ DocumentCopyFlags ulFlags, /* i  Operation flags               */
 
     [DllImport("dmscli.dll", EntryPoint = "aaApi_SelectWorkspaceProfileByName", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_SelectWorkspaceProfileByName(string sWorkspaceProfileName);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_SelectUserWorkspaceProfile(int userId, int workspaceProfileId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_SelectWorkspaceProfile(int workspaceProfileId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_SelectWorkspaceProfilesForProject(int workspaceProfileId, int iProjectId);
+
+
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_GetWorkspaceProfileStringProperty", CharSet = CharSet.Unicode)]
+    public static extern IntPtr unsafe_aaApi_GetWorkspaceProfileStringProperty(IntPtr hDataBuffer, int propertyId, int rowIndex);
+    public static string aaApi_GetWorkspaceProfileStringProperty(IntPtr hDataBuffer, WorkspaceProfileProperty propertyId, int rowIndex)
+    {
+        return Marshal.PtrToStringUni(unsafe_aaApi_GetWorkspaceProfileStringProperty(hDataBuffer, (int) propertyId, rowIndex));
+    }
+
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_GetWorkspaceProfileNumericProperty", CharSet = CharSet.Unicode)]
+    public static extern IntPtr unsafe_aaApi_GetWorkspaceProfileNumericProperty(IntPtr hDataBuffer, WorkspaceProfileProperty propertyId, int rowIndex);
 
 
     [DllImport("dmscli.dll", EntryPoint = "aaApi_CreateGroup", CharSet = CharSet.Unicode)]
@@ -6670,11 +6717,11 @@ int lUserId           /* i  User number freeing document  */
         SkipCopyInSameEnvironment = 0x00000004
     }
 
-    ///* Ignore attribute copy options defined by environment */
+    /* Ignore attribute copy options defined by environment */
     //#define AADMS_ATTRCOPYF_IGNORE_ENVCOPYOPTS                0x00000001
-    ///* Copy code fields (by default - code fields are not copied) */
+    /* Copy code fields (by default - code fields are not copied) */
     //#define AADMS_ATTRCOPYF_COPY_CODEFIELDS                   0x00000002
-    ///* Skip attribute copying in the same environment */
+    /* Skip attribute copying in the same environment */
     //#define AADMS_ATTRCOPYF_SKIP_COPY_IN_SAME_ENVIRONMENT     0x00000004
 
 
@@ -6925,11 +6972,11 @@ int lChildDocumentId, /* i  Child document number of set     */
 bool bCheckOut         /* i  Transfer type for the set member */
 );
 
-    ///* Ignore attribute copy options defined by environment */
+    /* Ignore attribute copy options defined by environment */
     //#define AADMS_ATTRCOPYF_IGNORE_ENVCOPYOPTS                0x00000001
-    ///* Copy code fields (by default - code fields are not copied) */
+    /* Copy code fields (by default - code fields are not copied) */
     //#define AADMS_ATTRCOPYF_COPY_CODEFIELDS                   0x00000002
-    ///* Skip attribute copying in the same environment */
+    /* Skip attribute copying in the same environment */
     //#define AADMS_ATTRCOPYF_SKIP_COPY_IN_SAME_ENVIRONMENT     0x00000004
 
 
@@ -6942,11 +6989,11 @@ int lDocumentId,  /* i  Member document number                 */
 bool bCheckOut     /* i  Check out when set is checked out flag */
 );
 
-    ///* Ignore attribute copy options defined by environment */
+    /* Ignore attribute copy options defined by environment */
     //#define AADMS_ATTRCOPYF_IGNORE_ENVCOPYOPTS                0x00000001
-    ///* Copy code fields (by default - code fields are not copied) */
+    /* Copy code fields (by default - code fields are not copied) */
     //#define AADMS_ATTRCOPYF_COPY_CODEFIELDS                   0x00000002
-    ///* Skip attribute copying in the same environment */
+    /* Skip attribute copying in the same environment */
     //#define AADMS_ATTRCOPYF_SKIP_COPY_IN_SAME_ENVIRONMENT     0x00000004
 
 
@@ -7506,6 +7553,10 @@ int lStateId         /* i  State number                     */
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectSet(int iSetId);
 
+    [DllImport("dmscli.dll", EntryPoint = "aaApi_SelectSetDataBuffer", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_SelectSetDataBuffer(int itemID);
+
+
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern int aaApi_SelectSetReferences(int iMasterProjId, int iMasterDocId);
 
@@ -7618,10 +7669,10 @@ int lObjectId2To       /* i  Target access identifier 2        */
     [Flags]
     public enum QueryResultFlags : uint
     {
-        Unfiltered = 0x00000000,        /**< all results that match the given query returned          */
-        NoDocVersions = 0x00000001,     /**< document versions are not returned as results            */
-        VersionsBySetting = 0x00000002, /**< versions are returned if "Show versions" setting is On   */
-        VersionFieldMask = 0x00000003   /**< <mask to filter out from the flags */
+        Unfiltered = 0x00000000,        /* all results that match the given query returned          */
+        NoDocVersions = 0x00000001,     /* document versions are not returned as results            */
+        VersionsBySetting = 0x00000002, /* versions are returned if "Show versions" setting is On   */
+        VersionFieldMask = 0x00000003   /* <mask to filter out from the flags */
     }
 
     public static Guid PSET_DOCUMENT_GENERIC = new Guid("4E43310A-4524-4417-AE6E-D73BD7796123");
@@ -7734,7 +7785,7 @@ int lObjectId2To       /* i  Target access identifier 2        */
     public struct _FINDDOC_RESULTCOL
     {
         [FieldOffset(0)]
-        public uint dwType; /**< DMS_RESULT_TYPE_* */
+        public uint dwType; /* DMS_RESULT_TYPE_* */
         [FieldOffset(4)]
         public uint __padding;
         [FieldOffset(8)]
@@ -7759,7 +7810,7 @@ int lObjectId2To       /* i  Target access identifier 2        */
     //public struct _FINDDOC_RESULTCOL_XM
     //{
     //    [FieldOffset(0)]
-    //    uint dwType; /**< DMS_RESULT_TYPE_* */
+    //    uint dwType; /* DMS_RESULT_TYPE_* */
 
 
     //    [FieldOffset(4)]
@@ -7868,14 +7919,14 @@ int lObjectId2To       /* i  Target access identifier 2        */
         QRY_DOC_PROP_PROJ_PROJGUID = 143,
         QRY_DOC_PROP_PROJ_PPRJGUID = 144,
 
-        QRY_PROP_ACCUMULATED_TEXTS = 200,   /**< used for FTR queries only */
-        QRY_PROP_DATASOURCE_GUID = 201,   /**< used for FTR internally */
+        QRY_PROP_ACCUMULATED_TEXTS = 200,   /* used for FTR queries only */
+        QRY_PROP_DATASOURCE_GUID = 201,   /* used for FTR internally */
 
-        QRY_PROP_VIEW_ID = 250,   /**< used as UI hint only */
+        QRY_PROP_VIEW_ID = 250,   /* used as UI hint only */
 
-        QRY_DOC_PROP_CHECKOUT_USERID = 301,   /**< equivalent to QRY_CHKLOC_PROP_USERID + QRY_CHKLOC_PROP_TYPEFLAGS ('CO','CS','XS')   */
-        QRY_DOC_PROP_CHECKOUT_NODE = 302,   /**< equivalent to QRY_CHKLOC_PROP_NODE + QRY_CHKLOC_PROP_TYPEFLAGS ('CO','CS','XS')     */
-        QRY_DOC_PROP_CHECKOUT_COUTTIME = 303,    /**< equivalent to QRY_CHKLOC_PROP_COUTTIME + QRY_CHKLOC_PROP_TYPEFLAGS ('CO','CS','XS') */
+        QRY_DOC_PROP_CHECKOUT_USERID = 301,   /* equivalent to QRY_CHKLOC_PROP_USERID + QRY_CHKLOC_PROP_TYPEFLAGS ('CO','CS','XS')   */
+        QRY_DOC_PROP_CHECKOUT_NODE = 302,   /* equivalent to QRY_CHKLOC_PROP_NODE + QRY_CHKLOC_PROP_TYPEFLAGS ('CO','CS','XS')     */
+        QRY_DOC_PROP_CHECKOUT_COUTTIME = 303,    /* equivalent to QRY_CHKLOC_PROP_COUTTIME + QRY_CHKLOC_PROP_TYPEFLAGS ('CO','CS','XS') */
 
         QRY_FTR_PROP_SEARCH_TEXT = 1,
         QRY_FTR_PROP_SCOPE_ID = 2
@@ -7884,104 +7935,104 @@ int lObjectId2To       /* i  Target access identifier 2        */
 
     public enum RestrictionRelation : int
     {
-        DMS_RELATION_NONE = 0,   /**< No relation specified */
-        DMS_RELATION_EQUAL = 1,   /**<  =   */
-        DMS_RELATION_NOTEQUAL = 2,   /**<  <>  */
-        DMS_RELATION_LESSTHAN = 3,   /**<  <   */
-        DMS_RELATION_GREATERTHAN = 4,   /**<  >   */
-        DMS_RELATION_GREATEROREQUAL = 5,   /**<  >=  */
-        DMS_RELATION_LESSOREQUAL = 6,   /**<  <=  */
-        DMS_RELATION_BETWEEN = 7,   /**< BETWEEN     */
-        DMS_RELATION_ISNULL = 8,   /**< IS NULL     */
-        DMS_RELATION_ISNOTNULL = 9,   /**< IS NOT NULL */
-        DMS_RELATION_ISLIKE = 10,   /**< LIKE        */
-        DMS_RELATION_IN = 11,   /**< IN          */
-        DMS_RELATION_NOTIN = 12,   /**< NOT IN      */
-        DMS_RELATION_INNERJOIN = 13,   /**< INNER JOIN  */
-        DMS_RELATION_LEFTOUTERJOIN = 14,   /**< LEFT OUTER JOIN */
-        DMS_RELATION_RIGHTOUTERJOIN = 15,   /**< RIGHT OUTER JOIN */
-        DMS_RELATION_ISNOTLIKE = 16,   /**< NOT LIKE    */
-        DMS_RELATION_NOTBETWEEN = 17,   /**< NOT BETWEEN */
-        DMS_RELATION_NODE_OR_SUBNODE = 18,   /**< folders & subfolders, etc. */
-        DMS_RELATION_DERIVED_TYPE = 19,   /**< folders & subfolders, etc. */
+        DMS_RELATION_NONE = 0,   /* No relation specified */
+        DMS_RELATION_EQUAL = 1,   /*  =   */
+        DMS_RELATION_NOTEQUAL = 2,   /*  <>  */
+        DMS_RELATION_LESSTHAN = 3,   /*  <   */
+        DMS_RELATION_GREATERTHAN = 4,   /*  >   */
+        DMS_RELATION_GREATEROREQUAL = 5,   /*  >=  */
+        DMS_RELATION_LESSOREQUAL = 6,   /*  <=  */
+        DMS_RELATION_BETWEEN = 7,   /* BETWEEN     */
+        DMS_RELATION_ISNULL = 8,   /* IS NULL     */
+        DMS_RELATION_ISNOTNULL = 9,   /* IS NOT NULL */
+        DMS_RELATION_ISLIKE = 10,   /* LIKE        */
+        DMS_RELATION_IN = 11,   /* IN          */
+        DMS_RELATION_NOTIN = 12,   /* NOT IN      */
+        DMS_RELATION_INNERJOIN = 13,   /* INNER JOIN  */
+        DMS_RELATION_LEFTOUTERJOIN = 14,   /* LEFT OUTER JOIN */
+        DMS_RELATION_RIGHTOUTERJOIN = 15,   /* RIGHT OUTER JOIN */
+        DMS_RELATION_ISNOTLIKE = 16,   /* NOT LIKE    */
+        DMS_RELATION_NOTBETWEEN = 17,   /* NOT BETWEEN */
+        DMS_RELATION_NODE_OR_SUBNODE = 18,   /* folders & subfolders, etc. */
+        DMS_RELATION_DERIVED_TYPE = 19,   /* folders & subfolders, etc. */
 
         /** valid for FTR criteria only */
         DMS_RELATION_EXPRESSION = 1024,
 
-        DMS_RELATION_INCL_PHRASE = 5000, /**< includes whole phrase */
-        DMS_RELATION_INCL_ANYWORD = 5001, /**< includes any word */
-        DMS_RELATION_INCL_ALLWORDS = 5002, /**< includes all words */
-        DMS_RELATION_INCL_NONEOFWORDS = 5003, /**< does not include any of the words */
+        DMS_RELATION_INCL_PHRASE = 5000, /* includes whole phrase */
+        DMS_RELATION_INCL_ANYWORD = 5001, /* includes any word */
+        DMS_RELATION_INCL_ALLWORDS = 5002, /* includes all words */
+        DMS_RELATION_INCL_NONEOFWORDS = 5003, /* does not include any of the words */
 
-        DMS_RELATION_SUBQUERY_COLUMN = 6001, /**< subquery column (value == column id) [GT_SUBQUERY]*/
-        DMS_RELATION_UNION_ALL = 6002, /**< used witn GT_UNION/PSET_DBSUBQUERY */
+        DMS_RELATION_SUBQUERY_COLUMN = 6001, /* subquery column (value == column id) [GT_SUBQUERY]*/
+        DMS_RELATION_UNION_ALL = 6002, /* used witn GT_UNION/PSET_DBSUBQUERY */
 
-        DMS_RELATION_SUBORGROUP = 7003, /**< used to define sub group in query defined by UT_SUBGROUP_TAG. OR operand will be used to join criteria in sub group*/
-        DMS_RELATION_SUBANDGROUP = 7004  /**< used to define sub group in query defined by UT_SUBGROUP_TAG. AND operand will be used to join criteria in sub group*/
+        DMS_RELATION_SUBORGROUP = 7003, /* used to define sub group in query defined by UT_SUBGROUP_TAG. OR operand will be used to join criteria in sub group*/
+        DMS_RELATION_SUBANDGROUP = 7004  /* used to define sub group in query defined by UT_SUBGROUP_TAG. AND operand will be used to join criteria in sub group*/
     }
 
 
     [Flags]
     public enum CriteriaGroupType : uint
     {
-        GT_RESTRICTION = 0x00000000,       /**< Group defines result restrictions */
-        GT_JOIN = 0x00000001,       /**< Group defines relation conditions between tables */
-        GT_ROWSET_ID = 0x00000002,       /**< Defines table columns to be unique per returned row set */
-        GT_SUBQUERY = 0x00000003,       /**< Group defines SQL sub-select columns */
-        GT_FREE_TEXT = 0x00000004,       /**< Group defines free text search restrictions */
-        GT_UNION = 0x00000005,       /**< Group defines union, etc. of 2 or more SQL sub-selects */
-        GT_QRY_SPLIT = 0x00000006,       /**< Defines psetSimpleSearch SQL query split group */
-        GT_FIELD_MASK = 0x00000007        /**< Mask to filter out from the flags */
+        GT_RESTRICTION = 0x00000000,       /* Group defines result restrictions */
+        GT_JOIN = 0x00000001,       /* Group defines relation conditions between tables */
+        GT_ROWSET_ID = 0x00000002,       /* Defines table columns to be unique per returned row set */
+        GT_SUBQUERY = 0x00000003,       /* Group defines SQL sub-select columns */
+        GT_FREE_TEXT = 0x00000004,       /* Group defines free text search restrictions */
+        GT_UNION = 0x00000005,       /* Group defines union, etc. of 2 or more SQL sub-selects */
+        GT_QRY_SPLIT = 0x00000006,       /* Defines psetSimpleSearch SQL query split group */
+        GT_FIELD_MASK = 0x00000007        /* Mask to filter out from the flags */
     }
 
 
     [Flags]
     public enum CriteriaValueType : uint
     {
-        VT_SINGLE_VALUE = 0x00000000,       /**< Criterion contains a single value. Specify this flag if you define criterion like Document.Id = 123 */
-        VT_NO_VALUE = 0x00000008,       /**< Criterion contains no value. Specify this flag with criterion like Table.Column IS NULL */
-        VT_VALUE_ARRAY = 0x00000010,       /**< Criterion contains an array of values. Specify this flag with criterion like Document.VersionSeq BETWEEN 12 AND 13. In such case multiple values are put to the same value field and need to be setarated by DMS_SQRY_ARRAY_SEPARATOR, for example: "12|13".Criterion contains an array of values.*/
-        VT_PROPERTY_ID = 0x00000018,       /**< Criterion contains a reference to another object property in the value field. Specify this flag with criterion defining join condition including properties from two tables. The property reference needs to be coverted to a specifically formatted string. */
-        VT_VALUE_BLOB = 0x00001000,       /**< Criterion contains a binary data */
-        VT_FIELD_MASK = 0x0000f018        /**< Mask to filter out from the flags */
+        VT_SINGLE_VALUE = 0x00000000,       /* Criterion contains a single value. Specify this flag if you define criterion like Document.Id = 123 */
+        VT_NO_VALUE = 0x00000008,       /* Criterion contains no value. Specify this flag with criterion like Table.Column IS NULL */
+        VT_VALUE_ARRAY = 0x00000010,       /* Criterion contains an array of values. Specify this flag with criterion like Document.VersionSeq BETWEEN 12 AND 13. In such case multiple values are put to the same value field and need to be setarated by DMS_SQRY_ARRAY_SEPARATOR, for example: "12|13".Criterion contains an array of values.*/
+        VT_PROPERTY_ID = 0x00000018,       /* Criterion contains a reference to another object property in the value field. Specify this flag with criterion defining join condition including properties from two tables. The property reference needs to be coverted to a specifically formatted string. */
+        VT_VALUE_BLOB = 0x00001000,       /* Criterion contains a binary data */
+        VT_FIELD_MASK = 0x0000f018        /* Mask to filter out from the flags */
     }
 
 
     [Flags]
     public enum CriteriaUsageType : uint
     {
-        UT_REGULAR = 0x00000000,       /**< regular criterion usage */
-        UT_UI_HINT_ONLY = 0x00000020,       /**< not a criterion - used only in user interface */
-        UT_OVERLAY = 0x00000060,       /**< not a criterion - used only internally to extend other criteria */
-        UT_SUBQUERY_TAG = 0x000000a0,       /**< not a criterion - specifies the sub-query (Union argument) the group applies to */
-        UT_SUBGROUP_TAG = 0x000000c0,       /**< not a criterion - specifies the sub "or" group */
-        UT_FIELD_MASK = 0x00000fe0        /**< <mask to filter out from the flags> */
+        UT_REGULAR = 0x00000000,       /* regular criterion usage */
+        UT_UI_HINT_ONLY = 0x00000020,       /* not a criterion - used only in user interface */
+        UT_OVERLAY = 0x00000060,       /* not a criterion - used only internally to extend other criteria */
+        UT_SUBQUERY_TAG = 0x000000a0,       /* not a criterion - specifies the sub-query (Union argument) the group applies to */
+        UT_SUBGROUP_TAG = 0x000000c0,       /* not a criterion - specifies the sub "or" group */
+        UT_FIELD_MASK = 0x00000fe0        /* <mask to filter out from the flags> */
     }
 
 
     [Flags]
     public enum CriteriaFlags : uint
     {
-        GT_RESTRICTION = 0x00000000,       /**< Group defines result restrictions */
-        GT_JOIN = 0x00000001,       /**< Group defines relation conditions between tables */
-        GT_ROWSET_ID = 0x00000002,       /**< Defines table columns to be unique per returned row set */
-        GT_SUBQUERY = 0x00000003,       /**< Group defines SQL sub-select columns */
-        GT_FREE_TEXT = 0x00000004,       /**< Group defines free text search restrictions */
-        GT_UNION = 0x00000005,       /**< Group defines union, etc. of 2 or more SQL sub-selects */
-        GT_QRY_SPLIT = 0x00000006,       /**< Defines psetSimpleSearch SQL query split group */
-        GT_FIELD_MASK = 0x00000007,       /**< Mask to filter out from the flags */
-        VT_SINGLE_VALUE = 0x00000000,       /**< Criterion contains a single value. Specify this flag if you define criterion like Document.Id = 123 */
-        VT_NO_VALUE = 0x00000008,       /**< Criterion contains no value. Specify this flag with criterion like Table.Column IS NULL */
-        VT_VALUE_ARRAY = 0x00000010,       /**< Criterion contains an array of values. Specify this flag with criterion like Document.VersionSeq BETWEEN 12 AND 13. In such case multiple values are put to the same value field and need to be setarated by DMS_SQRY_ARRAY_SEPARATOR, for example: "12|13".Criterion contains an array of values.*/
-        VT_PROPERTY_ID = 0x00000018,       /**< Criterion contains a reference to another object property in the value field. Specify this flag with criterion defining join condition including properties from two tables. The property reference needs to be coverted to a specifically formatted string. */
-        VT_VALUE_BLOB = 0x00001000,       /**< Criterion contains a binary data */
-        VT_FIELD_MASK = 0x0000f018,       /**< Mask to filter out from the flags */
-        UT_REGULAR = 0x00000000,       /**< regular criterion usage */
-        UT_UI_HINT_ONLY = 0x00000020,       /**< not a criterion - used only in user interface */
-        UT_OVERLAY = 0x00000060,       /**< not a criterion - used only internally to extend other criteria */
-        UT_SUBQUERY_TAG = 0x000000a0,       /**< not a criterion - specifies the sub-query (Union argument) the group applies to */
-        UT_SUBGROUP_TAG = 0x000000c0,       /**< not a criterion - specifies the sub "or" group */
-        UT_FIELD_MASK = 0x00000fe0        /**< <mask to filter out from the flags> */
+        GT_RESTRICTION = 0x00000000,       /* Group defines result restrictions */
+        GT_JOIN = 0x00000001,       /* Group defines relation conditions between tables */
+        GT_ROWSET_ID = 0x00000002,       /* Defines table columns to be unique per returned row set */
+        GT_SUBQUERY = 0x00000003,       /* Group defines SQL sub-select columns */
+        GT_FREE_TEXT = 0x00000004,       /* Group defines free text search restrictions */
+        GT_UNION = 0x00000005,       /* Group defines union, etc. of 2 or more SQL sub-selects */
+        GT_QRY_SPLIT = 0x00000006,       /* Defines psetSimpleSearch SQL query split group */
+        GT_FIELD_MASK = 0x00000007,       /* Mask to filter out from the flags */
+        VT_SINGLE_VALUE = 0x00000000,       /* Criterion contains a single value. Specify this flag if you define criterion like Document.Id = 123 */
+        VT_NO_VALUE = 0x00000008,       /* Criterion contains no value. Specify this flag with criterion like Table.Column IS NULL */
+        VT_VALUE_ARRAY = 0x00000010,       /* Criterion contains an array of values. Specify this flag with criterion like Document.VersionSeq BETWEEN 12 AND 13. In such case multiple values are put to the same value field and need to be setarated by DMS_SQRY_ARRAY_SEPARATOR, for example: "12|13".Criterion contains an array of values.*/
+        VT_PROPERTY_ID = 0x00000018,       /* Criterion contains a reference to another object property in the value field. Specify this flag with criterion defining join condition including properties from two tables. The property reference needs to be coverted to a specifically formatted string. */
+        VT_VALUE_BLOB = 0x00001000,       /* Criterion contains a binary data */
+        VT_FIELD_MASK = 0x0000f018,       /* Mask to filter out from the flags */
+        UT_REGULAR = 0x00000000,       /* regular criterion usage */
+        UT_UI_HINT_ONLY = 0x00000020,       /* not a criterion - used only in user interface */
+        UT_OVERLAY = 0x00000060,       /* not a criterion - used only internally to extend other criteria */
+        UT_SUBQUERY_TAG = 0x000000a0,       /* not a criterion - specifies the sub-query (Union argument) the group applies to */
+        UT_SUBGROUP_TAG = 0x000000c0,       /* not a criterion - specifies the sub "or" group */
+        UT_FIELD_MASK = 0x00000fe0        /* <mask to filter out from the flags> */
     }
 
 
@@ -8209,10 +8260,18 @@ int lObjectId2To       /* i  Target access identifier 2        */
     public static extern bool aaApi_AddHook(int lHookId, int lHookType, HookFunction lpfnHook);
 
     [DllImport("dmsgen.dll", CharSet = CharSet.Unicode)]
-    public static extern bool aaApi_AddHook(int lHookId, int lHookType, DoumentHookFunction lpfnHook);
+    public static extern bool aaApi_AddHook(int lHookId, int lHookType, DocumentHookFunction lpfnHook);
 
     [DllImport("dmsgen.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_AddHook(int lHookId, PWWrapper.HookTypes lHookType, GenericHookFunction lpfnHook);
+
+    [DllImport("dmsgen.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_RemoveHook(int lHookId, PWWrapper.HookTypes lHookType, GenericHookFunction lpfnHook);
+    [DllImport("dmsgen.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_RemoveHook(int lHookId, PWWrapper.HookTypes lHookType, HookFunction lpfnHook);
+
+    [DllImport("dmsgen.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_RemoveHook(int lHookId, PWWrapper.HookTypes lHookType, DocumentHookFunction lpfnHook);
 
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern bool aaApi_CreateCustomHierarchy
@@ -10542,6 +10601,9 @@ int lLenghtBuffer            /* i  Buffer length           */
         WPCBSETTINGPROP_VALUES = 4
     }
 
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_getDataBufferBufferProperty(IntPtr hWorkspaceBuffer, PWWrapper.WorkspaceDmsBufferVariablesProperty propertyId, int iIndex);
+
     [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr aaApi_MwpSelectWorkspaceDataBuffer(WorkspaceAssocObjectType workspaceAssocObjectType,
         ref Guid objectGuid, int iObjectId, int iUserId, uint uiFlags);
@@ -10564,7 +10626,183 @@ int lLenghtBuffer            /* i  Buffer length           */
         return Marshal.PtrToStringUni(__workspace_getDataBufferStringProperty(hWorkspaceBuffer, (int)propertyId, iIndex));
     }
 
-#endregion
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_selectDmsAssocObjectLinkingConfBlock(int iConfBlockId);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_selectDmsAssocObjectAssignedToFolderDocs(int iFolderId);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_selectDmsAssocObjectByID(WorkspaceAssocObjectType objectType, ref Guid objGuid, int iObjectId);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_selectDmsAssocObjectByID(WorkspaceAssocObjectType objectType, IntPtr objGuidP, int iObjectId);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_selectConfBlocksByLevel(WorkspaceLevelType level);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr workspace_selectDmsAssocObjectByID(WorkspaceLevelType objectType, ref Guid pObjectGuid, int objectID);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_createDmsAssocObject(WorkspaceLevelType objectType, ref Guid pObjectGuid, int objectID, uint uiFlags, ref int pDmsAssocID);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_unlinkDmsAssocObjFromConfBlock(int objectID, int csbID);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_deleteDmsAssocObject(int dmsAssocID);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_createConfBlock(string name, string desc, uint flags, WorkspaceLevelType level, ref int pConfBlockId);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_deleteConfBlock(int confBlockId);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_freeDataBuffer(IntPtr hBuffer);
+
+    // [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    // public static extern int workspace_getItemCountInDataBuffer(IntPtr hBuffer);
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_modifyConfBlock(int confBlockId, string name, string desc, uint flags);
+
+    // not sure this is right...
+    public class WorkspaceValueInfo
+    {
+        public WorkspaceOperation opType;
+        public WorkspaceValue valType;
+        public int valInt;
+        public char[] valText; //WCHAR WorkspaceValueInfo_stc::valText[ODS_ATTR_WP_VALUESETTING_TEXT_LEN] 
+        public double valDouble;
+    }
+
+    [DllImport("PWManagedWorkspace.dll", CharSet = CharSet.Unicode)]
+    public static extern bool workspace_createConfBlockVar(int confBlockId, uint flags, string name, string desc, WorkspaceValueInfo pValInfo, ref int valInfoCount, int previousVariableId, ref int pVariableId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_MwpSelectCsbDataBufferByProp(WorkspaceAssocObjectType type,
+        int[] pConfBlockIDsToExclude,
+        int confBlockCount,
+        bool excludePrivateBlock);
+
+    public static WorkspaceLevelType GetWorkspaceType(string WorkspaceType)
+    {
+        SortedList<string, WorkspaceLevelType> sortedList = new SortedList<string, WorkspaceLevelType>();
+        sortedList.Add("predefined", WorkspaceLevelType.WORKSPACELEVEL_PREDEFINED);
+        sortedList.Add("global", WorkspaceLevelType.WORKSPACELEVEL_GLOBAL);
+        sortedList.Add("application", WorkspaceLevelType.WORKSPACELEVEL_APPLICATION);
+        sortedList.Add("customer", WorkspaceLevelType.WORKSPACELEVEL_CUSTOMER);
+        sortedList.Add("site", WorkspaceLevelType.WORKSPACELEVEL_SITE);
+        sortedList.Add("workspace", WorkspaceLevelType.WORKSPACELEVEL_WORKSPACE);
+        sortedList.Add("workset", WorkspaceLevelType.WORKSPACELEVEL_PROJECT);
+        sortedList.Add("project", WorkspaceLevelType.WORKSPACELEVEL_PROJECT);
+        sortedList.Add("role", WorkspaceLevelType.WORKSPACELEVEL_DISCIPLINE);
+        sortedList.Add("user", WorkspaceLevelType.WORKSPACELEVEL_USER);
+        WorkspaceLevelType value = WorkspaceLevelType.WORKSPACELEVEL_INVALID;
+        if (sortedList.ContainsKey(WorkspaceType.ToLower()))
+        {
+            sortedList.TryGetValue(WorkspaceType.ToLower(), out value);
+        }
+
+        return value;
+    }
+
+    public static int GetWorkspaceConfigBlockID(string Type, string Name)
+    {
+        WorkspaceLevelType workspaceType = GetWorkspaceType(Type);
+        int result = -1;
+        IntPtr intPtr = aaApi_MwpSelectCsbDataBufferByProp(workspaceType, 0, 0, excludePrivateBlock: true);
+        if (intPtr != IntPtr.Zero)
+        {
+            int num = PWWrapper.aaApi_DmsDataBufferGetCount(intPtr);
+            for (int i = 0; i < num; i++)
+            {
+                string text = PWWrapper.aaApi_DmsDataBufferGetStringProperty(intPtr, Convert.ToInt32(MWPConfBlockProperties.MWPCONFBLOCK_PROP_NAME), i);
+                if (Name.ToLower().Equals(text.ToLower()))
+                {
+                    result = PWWrapper.aaApi_DmsDataBufferGetNumericProperty(intPtr, Convert.ToInt32(MWPConfBlockProperties.MWPCONFBLOCK_PROP_ID), i);
+                    break;
+                }
+            }
+
+            PWWrapper.aaApi_DmsDataBufferFree(intPtr);
+        }
+
+        return result;
+    }
+
+    public static string GetWorkspaceCSBLevelNameFromLevel(int iLevel)
+    {
+        string result = string.Empty;
+        switch (iLevel)
+        {
+            case 0:
+                result = "INVALID";
+                break;
+            case 1:
+                result = "GLOBAL";
+                break;
+            case 2:
+                result = "APPLICATION";
+                break;
+            case 3:
+                result = "CUSTOMER";
+                break;
+            case 4:
+                result = "SITE";
+                break;
+            case 5:
+                result = "PROJECT";
+                break;
+            case 6:
+                result = "DISCIPLINE";
+                break;
+            case 7:
+                result = "USER";
+                break;
+            case 11:
+                result = "USER_PRIVATE";
+                break;
+            case 12:
+                result = "PREDEFINED";
+                break;
+            case 13:
+                result = "WORKSPACE";
+                break;
+        }
+
+        return result;
+    }
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_MwpCreateDmsAssociationObject(PWWrapper.WorkspaceAssocObjectType objectType, ref Guid pObjectGuid, int objectID, uint uiFlags, ref int pDmsAssocID);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_MwpLinkAssocObjectToConfBlock(int assocObjectId, int confBlockId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_MwpSelectCsbDataBufferByProp(WorkspaceLevelType level, int pConfBlockIDsToExclude, int confBlockCount, bool excludePrivateBlock);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_MwpSelectCsbDataBufferById(int confBlockID);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr aaApi_MwpSelectWorkspaceDataBuffer(WorkspaceObjectType objType, ref Guid pObjectGuid, int objectID, uint flags);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_MwpDeleteDmsObjectAssociationForSubTree(int parentProjectId);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_MwpSelectWorkspaceInstances(PWWrapper.WorkspaceAssocObjectType objectType, ref Guid pObjectGuid, int objectID, int userId, uint flags, ref int pBlockCount, IntPtr pAssocObjects, IntPtr ppInstances);
+
+    [DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    public static extern bool aaApi_MwpCopyConfBlockAssignments(ref DMSMWP_COPYITEM pItemsToCopyCsb, uint count);
+
+
+
+    #endregion
 
     public static SortedList<string, string> GetInstancePropertyValuesInList(int iClassId, int iInstanceId)
     {
@@ -12431,8 +12669,156 @@ int lLenghtBuffer            /* i  Buffer length           */
 
         return false;
     }
+    public static string LastErrorFormatted()
+    {
+        int errID = aaApi_GetLastErrorId();
+        string Detail = aaApi_GetLastErrorMessage();
 
-#endregion
+        if (string.IsNullOrEmpty(Detail)) { Detail = ""; }
+        else { Detail = "; Details: " + Detail; }
+
+        return "[Err " + errID.ToString() + "]: " + aaApi_GetMessageByErrorId(errID) + Detail;
+    }
+
+
+    #endregion
+
+    public enum WorkspaceLevelType : int
+    {
+        WORKSPACELEVEL_INVALID = 0,
+        WORKSPACELEVEL_GLOBAL = 1,
+        WORKSPACELEVEL_APPLICATION = 2,
+        WORKSPACELEVEL_CUSTOMER = 3,  // Customer configuratiuon.
+        WORKSPACELEVEL_SITE = 4,  // Site/Organization configuration.  
+        WORKSPACELEVEL_PROJECT = 5,  // Project/Workset configuration.  
+        WORKSPACELEVEL_DISCIPLINE = 6,  // Discipline/Role configuration.  
+        WORKSPACELEVEL_USER = 7,  // User configuration.
+                                  // 8 thru 10 deliberately left out per SDK documentation.
+        WORKSPACELEVEL_USER_PRIVATE = 11, // Level for the private user configuration block.
+        WORKSPACELEVEL_PREDEFINED = 12, // Configuration blocks from predefined level will be process before handling mslocal.cfg.
+        WORKSPACELEVEL_WORKSPACE = 13  // Workspace configuration.  
+    }
+
+
+    public enum eWorkspaceAssocObjectType_t : int
+    {
+        WORKSPACEOBJECTTYPE_INVALID = 0,
+        WORKSPACEOBJECTTYPE_DATASOURCE = 1,
+        WORKSPACEOBJECTTYPE_USER = 2,
+        WORKSPACEOBJECTTYPE_PROJECT = 3,
+        WORKSPACEOBJECTTYPE_APPLICATION = 4,
+        WORKSPACEOBJECTTYPE_DOCUMENT = 5,
+        WORKSPACEOBJECTTYPE_GROUP = 6,
+        WORKSPACEOBJECTTYPE_USERLIST = 7
+    }
+
+    public enum WorkspaceValue : int
+    {
+        WORKSPACEVALTYPE_INVALID = 0,
+        WORKSPACEVALTYPE_DOCUMENT = 1,  // value will be GUID in text column
+        WORKSPACEVALTYPE_PROJECT = 2,  // value will be int in int column
+        WORKSPACEVALTYPE_FILE_PATH = 5,
+        WORKSPACEVALTYPE_DIR_PATH = 6,
+        WORKSPACEVALTYPE_STRING = 7,
+        WORKSPACEVALTYPE_INT = 8,
+        WORKSPACEVALTYPE_DOUBLE = 9,
+        WORKSPACEVALTYPE_CSB = 10, // value will be int in int column
+        WORKSPACEVALTYPE_CSB_MASK = 11  // value will be in text column
+    }
+
+    public enum WorkspaceOperation : int
+    {
+        WORKSPACEOPTYPE_INVALID = 0,
+        WORKSPACEOPTYPE_ASSIGNMENT = 1,
+        WORKSPACEOPTYPE_CONDITIONAL_ASSIGNMENT = 2,
+        WORKSPACEOPTYPE_APPEND_TO_LIST = 3,
+        WORKSPACEOPTYPE_PREFIX_TO_LIST = 4,
+        WORKSPACEOPTYPE_APPEND_TO_VALUE = 5,
+        WORKSPACEOPTYPE_UNDEFINE = 6,
+        WORKSPACEOPTYPE_CONCATENATE = 7,
+        WORKSPACEOPTYPE_DIRECTIVE = 8
+    }
+
+    public enum WorkspaceObjectType : int
+    {
+        WORKSPACEOBJECTTYPE_INVALID = 0,        //  Invalid value. 
+        WORKSPACEOBJECTTYPE_DATASOURCE = 1,     //  Datasource level association. 
+        WORKSPACEOBJECTTYPE_USER = 2,           //  User level association.  User ID will be specified in objectID parameter, if used in a function. 
+        WORKSPACEOBJECTTYPE_PROJECT = 3,        //  Project level association.  Project ID will be specified in objectID parameter, if used in a function. 
+        WORKSPACEOBJECTTYPE_APPLICATION = 4,    //  Application level association.  Application ID will be specified in objectID parameter, if used in a function. 
+        WORKSPACEOBJECTTYPE_DOCUMENT = 5,       //  Document level association.  Document GUID will be specified in objectGuid parameter, if used in a function. 
+        WORKSPACEOBJECTTYPE_GROUP = 6,          //  Group level association.  Group ID will be specified in objectID parameter, if used in a function. 
+        WORKSPACEOBJECTTYPE_USERLIST = 7        //  User List level association. User List ID will be specified in objectID parameter, if used in a function. 
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct DMSMWP_COPYITEM
+    {
+        public eWorkspaceAssocObjectType_t type;  /**< Specifies source and target type */
+        public int sourceID1;       /**< Source numeric ID. Value depends on type. */
+        public int targetID1;       /**< Target numeric ID. Value depends on type. */
+        public int sourceID2;       /**< Source numeric ID. Value depends on type. */
+        public int targetID2;       /**< Target numeric ID. Value depends on type. */
+        public Guid sourceGuid;      /**< Source GUID ID. Value depends on type. */
+        public Guid targetGuid;      /**< Target GUID ID. Value depends on type. */
+        public uint flags;           /**< Reserved for future use. Must be zero. */
+    }
+
+    //[DllImport("dmscli.dll", EntryPoint = "aaApi_MwpCopyConfBlockAssignments", CharSet = CharSet.Unicode)]
+    //public static extern bool aaApi_MwpCopyConfBlockAssignments
+    //    (
+    //    ref DMSMWP_COPYITEM pItemsToCopyCsb,
+    //    uint count
+    //    );
+
+    //[DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    //public static extern bool aaApi_MwpCreateDmsAssociationObject(PWWrapper.WorkspaceAssocObjectType objectType, ref Guid pObjectGuid, int objectID, uint uiFlags, ref int pDmsAssocID);
+
+    //// BOOL aaApi_MwpLinkAssocObjectToConfBlock(LONG assocObjectId, LONG confBlockId )
+    //[DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    //public static extern bool aaApi_MwpLinkAssocObjectToConfBlock(int assocObjectId, int confBlockId);
+
+    ////HAADMSBUFFER aaApi_MwpSelectCsbDataBufferByProp(eWorkspaceLevelType_t level, LONG const * pConfBlockIDsToExclude, LONG  confBlockCount, BOOL excludePrivateBlock ) 
+    //[DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    //public static extern IntPtr aaApi_MwpSelectCsbDataBufferByProp(WorkspaceLevelType level, int pConfBlockIDsToExclude, int confBlockCount, bool excludePrivateBlock);
+
+
+    //// HAADMSBUFFER aaApi_MwpSelectCsbDataBufferById(LONG confBlockId)
+    //[DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    //public static extern IntPtr aaApi_MwpSelectCsbDataBufferById(int confBlockID);
+
+
+
+    ////         HAADMSBUFFER aaApi_MwpSelectWorkspaceDataBuffer(eWorkspaceAssocObjectType_t objectType,
+    ////   LPCGUID objectGuid,
+    ////   LONG objectID,
+    ////   LONG userId,
+    ////   ULONG flags
+    ////  )
+    //[DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    //public static extern IntPtr aaApi_MwpSelectWorkspaceDataBuffer(WorkspaceObjectType objType, ref Guid pObjectGuid, int objectID, uint flags);
+
+
+
+    //// BOOL aaApi_MwpDeleteDmsObjectAssociationForSubTree(LONG parentProjectId)
+    //[DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    //public static extern bool aaApi_MwpDeleteDmsObjectAssociationForSubTree(int parentProjectId);
+
+    //// BOOL aaApi_MwpSelectWorkspaceInstances(eWorkspaceAssocObjectType_t objectType, LPCGUID pObjectGuid, LONG objectID, LONG userId, ULONG flags,
+    ////      LPLONG pBlockCount, LPDMSMWP_ASSOC_OBJECT* pAssocObjects, HAAODSINSTANCE** ppInstances )
+    //[DllImport("dmscli.dll", CharSet = CharSet.Unicode)]
+    //public static extern bool aaApi_MwpSelectWorkspaceInstances(PWWrapper.WorkspaceAssocObjectType objectType, ref Guid pObjectGuid, int objectID, int userId, uint flags,
+    //                                                                ref int pBlockCount, IntPtr pAssocObjects, IntPtr ppInstances);
+    public enum MWPConfBlockProperties : int
+    {
+        MWPCONFBLOCK_PROP_ID = 1,
+        MWPCONFBLOCK_PROP_FLAGS = 2,
+        MWPCONFBLOCK_PROP_LEVEL = 3,
+        MWPCONFBLOCK_PROP_NAME = 4,
+        MWPCONFBLOCK_PROP_DESC = 5
+    }
+
 
 }
 
@@ -12651,17 +13037,17 @@ public class CommonEnvironmentMethods
     [StructLayout(LayoutKind.Sequential)]
     public struct DMSTABLECOL_ITEM
     {
-        public IntPtr name;           /**< Specifies name of the column. */
-        public IntPtr description;    /**< Specifies description of the column. */
-        public IntPtr format;         /**< Column format to use in registering as a link table. */
-        public int columnId;       /**< Specifies column ID that is used in document management system registration. */
-        public int sqlType;        /**< Column SQL type. See \ref aadmsdef_TablesColumnsSQLstatements_SqlDataType "AASQL data types" for possible values. */
-        public int precision;      /**< Precision of the column type. If not applicable, should be set to (-1). */
-        public int scale;          /**< Scale of the column type. If not applicable, should be set to (-1). */
-        public IntPtr sqlTypeString;  /**< SQL type given by string. Should be used when there is no corresponding AASQL type. \em sqlType should be set to #AASQL_UNKNOWN. */
-        public int columnCType;    /**< Column SQL type. Must be from AASQL_C* range. */
-        public int columnLength;   /**< Length of the column. */
-        public int flags;          /**< Flags for the column. See \ref aadmsdef_TablesColumnsSQLstatements_TableColumnFlags "Table Column Flags" for possible values. */
+        public IntPtr name;           /* Specifies name of the column. */
+        public IntPtr description;    /* Specifies description of the column. */
+        public IntPtr format;         /* Column format to use in registering as a link table. */
+        public int columnId;       /* Specifies column ID that is used in document management system registration. */
+        public int sqlType;        /* Column SQL type. See \ref aadmsdef_TablesColumnsSQLstatements_SqlDataType "AASQL data types" for possible values. */
+        public int precision;      /* Precision of the column type. If not applicable, should be set to (-1). */
+        public int scale;          /* Scale of the column type. If not applicable, should be set to (-1). */
+        public IntPtr sqlTypeString;  /* SQL type given by string. Should be used when there is no corresponding AASQL type. \em sqlType should be set to #AASQL_UNKNOWN. */
+        public int columnCType;    /* Column SQL type. Must be from AASQL_C* range. */
+        public int columnLength;   /* Length of the column. */
+        public int flags;          /* Flags for the column. See \ref aadmsdef_TablesColumnsSQLstatements_TableColumnFlags "Table Column Flags" for possible values. */
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -19428,6 +19814,8 @@ public class SavedSearches
     }
 }
 
+
+#if !DO_NOT_INCLUDE_EXTENSIONS
 public static class Extensions
 {
     public static string SafeGet<TKey>(this SortedList<TKey, string> sortedList, TKey key)
@@ -19539,6 +19927,7 @@ public static class Extensions
 
 }
 
+#endif
 public class Node<T> : IEqualityComparer, IEnumerable<T>, IEnumerable<Node<T>>
 {
     public Node<T> Parent { get; private set; }
@@ -19941,6 +20330,7 @@ public static class NodeExtensions
     }
 }
 
+#if !DO_NOT_INCLUDE_EXTENSIONS
 public static class OtherExtensions
 {
     public static IEnumerable<TSource> Duplicates<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector)
@@ -19968,6 +20358,7 @@ public static class OtherExtensions
         return string.Format(CultureInfo.InvariantCulture, text, parameters);
     }
 }
+#endif
 
 public class FolderClass
 {
@@ -20018,4 +20409,5 @@ public class FolderClass
         // return folderNode.Value.CalculatedPath;
     }
 }
+
 
